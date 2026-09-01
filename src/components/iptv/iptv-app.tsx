@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState, useSyncExternalStore } from "react"
-import { FolderPlus, Radio, Search, Trash2 } from "lucide-react"
+import { FolderPlus, Radio, Search, Scale, Trash2 } from "lucide-react"
 
 import { ChannelSidebar } from "@/components/iptv/channel-sidebar"
 import { ImportDialog } from "@/components/iptv/import-dialog"
@@ -16,6 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { downloadPlaylist } from "@/lib/iptv-fetch"
 import { DEFAULT_IMPORT_IDS, KNOWN_PLAYLISTS } from "@/lib/known-playlists"
 import { groupChannels, parseM3u } from "@/lib/m3u"
@@ -37,6 +45,7 @@ export function IptvApp() {
     getIptvServerSnapshot,
   )
   const [importOpen, setImportOpen] = useState(false)
+  const [copyrightOpen, setCopyrightOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [sourceFilter, setSourceFilter] = useState("all")
   const [bootstrapping, setBootstrapping] = useState(false)
@@ -160,6 +169,10 @@ export function IptvApp() {
           <FolderPlus data-icon="inline-start" />
           导入 M3U
         </Button>
+        <Button variant="outline" size="sm" onClick={() => setCopyrightOpen(true)}>
+          <Scale data-icon="inline-start" />
+          版权
+        </Button>
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -219,6 +232,25 @@ export function IptvApp() {
         </main>
       </div>
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} />
+      <Dialog open={copyrightOpen} onOpenChange={setCopyrightOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>版权信息</DialogTitle>
+            <DialogDescription>IPTV 终端软件著作权说明</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 text-sm leading-6">
+            <p>软件名称：IPTV 终端</p>
+            <p>版权所有人：Abner Hu</p>
+            <p>Copyright © 2026 Abner Hu. All rights reserved.</p>
+            <p className="text-muted-foreground">
+              内置频道列表来自 iptv-org 等公开源，版权归各播出机构所有。本软件仅提供播放器与列表导入功能。
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setCopyrightOpen(false)}>关闭</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

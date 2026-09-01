@@ -54,8 +54,20 @@
             android:layout_height="40dp"
             android:backgroundTint="#D97706"
             android:focusable="true"
+            android:nextFocusRight="@id/copyrightButton"
             android:text="导入"
             android:textColor="#1C1917" />
+
+        <Button
+            android:id="@+id/copyrightButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="#292524"
+            android:focusable="true"
+            android:nextFocusLeft="@id/importMoreHeader"
+            android:text="版权"
+            android:textColor="#F5F5F4" />
     </LinearLayout>
 
     <EditText
