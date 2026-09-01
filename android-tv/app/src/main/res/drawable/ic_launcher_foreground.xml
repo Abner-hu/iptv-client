@@ -8,19 +8,12 @@
     <path
         android:fillColor="#DC2626"
         android:pathData="M30,30h48v48h-48z" />
-    <!-- I stem -->
+    <!-- I: plain vertical stem, no serifs -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M41,40h6v28h-6z" />
-    <!-- I serifs -->
+        android:pathData="M42,40h5v28h-5z" />
+    <!-- >: open chevron (triangle without a left bar) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M37,40h14v5h-14z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M37,63h14v5h-14z" />
-    <!-- > play chevron -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M56,40 L56,68 L76,54 Z" />
+        android:pathData="M54,40 L60.5,40 L74,54 L60.5,68 L54,68 L67.5,54 Z" />
 </vector>

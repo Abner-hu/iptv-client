@@ -119,8 +119,12 @@ export function IptvApp() {
   return (
     <div className="flex h-dvh min-h-0 flex-col bg-background">
       <header className="flex items-center gap-3 border-b border-white/10 px-4 py-2.5">
-        <span className="flex size-8 items-center justify-center rounded-md bg-red-600 text-[13px] font-bold tracking-tight text-white shadow-[0_0_20px_color-mix(in_oklch,red_40%,transparent)]">
-          I&gt;
+        <span className="flex size-8 items-center justify-center rounded-md bg-red-600 shadow-[0_0_20px_color-mix(in_oklch,red_40%,transparent)]">
+          <svg viewBox="0 0 32 32" className="size-5" aria-hidden>
+            <rect x="6.2" y="7" width="3.2" height="18" fill="white" />
+            <path d="M14 7h3.4L26 16l-8.6 9H14l8.2-9Z" fill="white" />
+          </svg>
+          <span className="sr-only">IPTV Client</span>
         </span>
         <div className="leading-tight">
           <h1 className="text-sm font-semibold tracking-wide">IPTV Client</h1>
