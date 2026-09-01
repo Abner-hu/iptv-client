@@ -19,7 +19,9 @@
 
 # production
 /build
-/release
+*.apk
+!public/iptv-tv.apk
+!release/*.apk
 
 # misc
 .DS_Store

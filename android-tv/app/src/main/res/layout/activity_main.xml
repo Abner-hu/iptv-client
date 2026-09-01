@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0B0D"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#DC2626"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="LIVE"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="IPTV 终端"
+                android:textColor="#F5F5F4"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/countBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 频道"
+                android:textColor="#A8A29E"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/searchInput"
+            android:layout_width="220dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp"
+            android:background="#1C1917"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="搜索频道"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:nextFocusDown="@id/channelList"
+            android:paddingHorizontal="12dp"
+            android:textColor="#F5F5F4"
+            android:textColorHint="#78716C"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/importMoreHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:backgroundTint="#D97706"
+            android:focusable="true"
+            android:nextFocusDown="@id/channelList"
+            android:text="导入 M3U"
+            android:textColor="#1C1917" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/emptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="尚未载入播放列表"
+                android:textColor="#F5F5F4"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/emptyHint"
+                android:layout_width="520dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="用遥控器选择下方按钮，导入 iptv-org 公开的中国内地与香港频道。部分源会因线路无法播放，换台即可。"
+                android:textColor="#A8A29E"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/importKnown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="52dp"
+                    android:backgroundTint="#D97706"
+                    android:focusable="true"
+                    android:nextFocusRight="@id/importEmptyMore"
+                    android:text="导入已知源（中国 + 香港）"
+                    android:textColor="#1C1917"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/importEmptyMore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="16dp"
+                    android:backgroundTint="#292524"
+                    android:focusable="true"
+                    android:nextFocusLeft="@id/importKnown"
+                    android:text="选择更多列表"
+                    android:textColor="#F5F5F4"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="360dp"
+                android:layout_height="match_parent"
+                android:background="#121110"
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/channelList"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:clipToPadding="false"
+                    android:descendantFocusability="afterDescendants"
+                    android:focusable="true"
+                    android:nextFocusRight="@id/playerView"
+                    android:paddingVertical="8dp" />
+
+                <Button
+                    android:id="@+id/importMore"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#292524"
+                    android:focusable="true"
+                    android:text="导入更多公开源"
+                    android:textColor="#F5F5F4" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#000000">
+
+                <androidx.media3.ui.PlayerView
+                    android:id="@+id/playerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    app:show_buffering="never"
+                    app:use_controller="false" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#99000000"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/nowPlaying"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="IPTV 终端"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/statusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="选择频道开始播放"
+                        android:textColor="#D6D3D1"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#FBBF24"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

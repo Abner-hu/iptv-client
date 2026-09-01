@@ -9,7 +9,8 @@
     "start": "next start --hostname 127.0.0.1 --port 43217",
     "lint": "eslint",
     "desktop": "electron .",
-    "dist:win": "electron-builder --win portable --x64"
+    "dist:win": "electron-builder --win portable --x64",
+    "apk": "bash scripts/build-tv-apk.sh"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.IptvTv" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">#0B0B0D</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:colorPrimary">#D97706</item>
+        <item name="colorAccent">#FBBF24</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+    <style name="TvDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:background">#1C1917</item>
+        <item name="android:textColor">#F5F5F4</item>
+        <item name="android:textColorPrimary">#F5F5F4</item>
+    </style>
+</resources>

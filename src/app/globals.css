@@ -92,10 +92,10 @@
     @apply font-sans;
     color-scheme: dark;
   }
-  body {
-    @apply bg-background text-foreground;
-    background-image:
-      radial-gradient(900px 420px at 8% -10%, color-mix(in oklch, var(--primary) 16%, transparent), transparent 60%),
-      linear-gradient(180deg, transparent, transparent);
+  button:focus-visible,
+  a:focus-visible,
+  [data-slot="button"]:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
   }
 }
