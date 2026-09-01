@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this, R.style.TvDialog)
             .setTitle("版权信息")
             .setMessage(
-                "软件名称：IPTV 终端\n" +
+                "软件名称：IPTV Client\n" +
                     "版权所有人：Abner Hu\n" +
                     "Copyright © 2026 Abner Hu. All rights reserved.\n\n" +
                     "内置频道列表来自 iptv-org 等公开源，版权归各播出机构所有。本软件仅提供播放器与列表导入功能。",

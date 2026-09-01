@@ -236,10 +236,10 @@ export function IptvApp() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>版权信息</DialogTitle>
-            <DialogDescription>IPTV 终端软件著作权说明</DialogDescription>
+            <DialogDescription>IPTV Client 软件著作权说明</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 text-sm leading-6">
-            <p>软件名称：IPTV 终端</p>
+            <p>软件名称：IPTV Client</p>
             <p>版权所有人：Abner Hu</p>
             <p>Copyright © 2026 Abner Hu. All rights reserved.</p>
             <p className="text-muted-foreground">
