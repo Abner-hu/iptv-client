@@ -188,62 +188,58 @@
                     android:textColor="#F5F5F4" />
             </LinearLayout>
 
-            <FrameLayout
-                android:id="@+id/playerShell"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="#000000">
+                android:orientation="vertical">
 
-                <androidx.media3.ui.PlayerView
-                    android:id="@+id/playerView"
+                <FrameLayout
+                    android:id="@+id/playerShell"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    app:resize_mode="fit"
-                    app:show_buffering="never"
-                    app:use_controller="false" />
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="#000000">
 
-                <LinearLayout
-                    android:id="@+id/playerMeta"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#99000000"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    <androidx.media3.ui.PlayerView
+                        android:id="@+id/playerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        app:resize_mode="fit"
+                        app:show_buffering="never"
+                        app:use_controller="false" />
 
-                    <TextView
-                        android:id="@+id/nowPlaying"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/playerMeta"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="IPTV Client"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:background="#99000000"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                    <TextView
-                        android:id="@+id/statusText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="选择频道开始播放"
-                        android:textColor="#D6D3D1"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/nowPlaying"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="IPTV Client"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
 
-                <ImageButton
-                    android:id="@+id/fullscreenButton"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_gravity="bottom|end"
-                    android:layout_margin="16dp"
-                    android:background="#99000000"
-                    android:contentDescription="全屏"
-                    android:focusable="true"
-                    android:nextFocusLeft="@id/channelList"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_fullscreen" />
-            </FrameLayout>
+                        <TextView
+                            android:id="@+id/statusText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="选择频道开始播放"
+                            android:textColor="#D6D3D1"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <include layout="@layout/player_controls" />
+            </LinearLayout>
         </LinearLayout>
 
         <ProgressBar

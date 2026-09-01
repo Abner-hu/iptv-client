@@ -218,7 +218,7 @@ export function IptvApp() {
             </div>
           ) : (
             <>
-              <PlayerStage channel={active} />
+              <PlayerStage channel={active} playlist={channels} onSelect={play} />
               <div className="h-72 overflow-hidden rounded-xl border border-white/10 md:hidden">
                 <ChannelSidebar
                   groups={groups}

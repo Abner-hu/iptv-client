@@ -192,19 +192,9 @@
                         android:textColor="#D6D3D1"
                         android:textSize="12sp" />
                 </LinearLayout>
-
-                <ImageButton
-                    android:id="@+id/fullscreenButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="bottom|end"
-                    android:layout_margin="12dp"
-                    android:background="#99000000"
-                    android:contentDescription="全屏"
-                    android:focusable="true"
-                    android:padding="10dp"
-                    android:src="@drawable/ic_fullscreen" />
             </FrameLayout>
+
+            <include layout="@layout/player_controls" />
 
             <LinearLayout
                 android:id="@+id/channelPane"

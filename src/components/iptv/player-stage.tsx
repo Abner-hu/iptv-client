@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 import Hls from "hls.js"
-import { Loader2, Maximize, Minimize, Volume2, VolumeX, WifiOff } from "lucide-react"
+import { Loader2, WifiOff } from "lucide-react"
 
 import { ChannelThumb } from "@/components/iptv/channel-thumb"
-import { Button } from "@/components/ui/button"
+import { PlayerControls } from "@/components/iptv/player-controls"
 import { proxiedStream } from "@/lib/iptv-fetch"
 import { cn } from "@/lib/utils"
 import type { Channel } from "@/lib/iptv-types"
@@ -64,14 +64,23 @@ async function exitNativeFullscreen(video: HTMLVideoElement) {
   if (exit) await Promise.resolve(exit())
 }
 
-function HlsPlayer({ channel }: { channel: Channel }) {
+function skipChannel(playlist: Channel[], currentId: string | undefined, delta: number) {
+  if (playlist.length === 0) return null
+  const index = playlist.findIndex((item) => item.id === currentId)
+  const from = index >= 0 ? index : 0
+  return playlist[(from + delta + playlist.length) % playlist.length]
+}
+
+function HlsPlayer({
+  channel,
+  volume,
+}: {
+  channel: Channel
+  volume: number
+}) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const stageRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [buffering, setBuffering] = useState(true)
-  const [muted, setMuted] = useState(false)
-  const [expanded, setExpanded] = useState(false)
-  const [nativeOn, setNativeOn] = useState(false)
 
   useEffect(() => {
     const video = videoRef.current
@@ -137,65 +146,25 @@ function HlsPlayer({ channel }: { channel: Channel }) {
   }, [channel])
 
   useEffect(() => {
-    const onFs = () => setNativeOn(!!nativeFullscreenElement())
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setExpanded(false)
-    }
-    document.addEventListener("fullscreenchange", onFs)
-    document.addEventListener("webkitfullscreenchange", onFs)
-    window.addEventListener("keydown", onKey)
     const video = videoRef.current
-    const onBegin = () => setNativeOn(true)
-    const onEnd = () => setNativeOn(false)
-    video?.addEventListener("webkitbeginfullscreen", onBegin)
-    video?.addEventListener("webkitendfullscreen", onEnd)
-    return () => {
-      document.removeEventListener("fullscreenchange", onFs)
-      document.removeEventListener("webkitfullscreenchange", onFs)
-      window.removeEventListener("keydown", onKey)
-      video?.removeEventListener("webkitbeginfullscreen", onBegin)
-      video?.removeEventListener("webkitendfullscreen", onEnd)
-    }
-  }, [])
-
-  const fullscreen = expanded || nativeOn
-
-  async function toggleFullscreen() {
-    const video = videoRef.current
-    const stage = stageRef.current
-    if (!video || !stage) return
-    if (fullscreen) {
-      await exitNativeFullscreen(video)
-      setExpanded(false)
-      return
-    }
-    const ok = await requestNativeFullscreen(stage, video)
-    if (!ok) setExpanded(true)
-  }
+    if (!video) return
+    video.volume = volume
+    video.muted = volume === 0
+  }, [volume, channel])
 
   return (
-    <div
-      ref={stageRef}
-      className={cn(
-        "player-stage relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-black ring-1 ring-white/10",
-        expanded && "fixed inset-0 z-50 rounded-none ring-0",
-      )}
-    >
+    <>
       <video
         ref={videoRef}
         className="h-full min-h-48 w-full bg-black object-contain md:min-h-0"
         controls={false}
         autoPlay
         playsInline
-        muted={muted}
         onClick={() => {
           const video = videoRef.current
           if (!video) return
           if (video.paused) void video.play()
           else video.pause()
-        }}
-        onDoubleClick={() => {
-          void toggleFullscreen()
         }}
       />
 
@@ -206,51 +175,69 @@ function HlsPlayer({ channel }: { channel: Channel }) {
       )}
 
       {error && (
-        <div className="absolute inset-x-0 bottom-16 mx-auto max-w-md rounded-xl bg-black/80 px-4 py-3 text-center text-sm text-white ring-1 ring-white/15">
+        <div className="absolute inset-x-0 bottom-4 mx-auto max-w-md rounded-xl bg-black/80 px-4 py-3 text-center text-sm text-white ring-1 ring-white/15">
           <p>无法播放「{channel.name}」</p>
           <p className="mt-1 text-xs text-white/70">
             {error}。公开源线路不稳定，可换一个频道或稍后再试。
           </p>
         </div>
       )}
-
-      <div className="absolute inset-x-0 top-0 flex items-start justify-between bg-gradient-to-b from-black/70 to-transparent p-4">
-        <div className="flex min-w-0 items-start gap-3">
-          <ChannelThumb name={channel.name} logo={channel.logo} className="size-10 ring-1 ring-white/15" />
-          <div className="min-w-0">
-            <p className="text-xs tracking-[0.2em] text-red-400">LIVE</p>
-            <h2 className="truncate text-lg font-medium text-white">{channel.name}</h2>
-            <p className="truncate text-xs text-white/60">{channel.group}</p>
-          </div>
-        </div>
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="text-white hover:bg-white/15 hover:text-white"
-            onClick={() => setMuted((value) => !value)}
-            aria-label={muted ? "取消静音" : "静音"}
-          >
-            {muted ? <VolumeX /> : <Volume2 />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="text-white hover:bg-white/15 hover:text-white"
-            aria-label={fullscreen ? "退出全屏" : "全屏"}
-            onClick={() => {
-              void toggleFullscreen()
-            }}
-          >
-            {fullscreen ? <Minimize /> : <Maximize />}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </>
   )
 }
 
-export function PlayerStage({ channel }: { channel: Channel | null }) {
+export function PlayerStage({
+  channel,
+  playlist,
+  onSelect,
+}: {
+  channel: Channel | null
+  playlist: Channel[]
+  onSelect: (channel: Channel) => void
+}) {
+  const stageRef = useRef<HTMLDivElement>(null)
+  const videoHostRef = useRef<HTMLDivElement>(null)
+  const [volume, setVolume] = useState(1)
+  const [expanded, setExpanded] = useState(false)
+  const [nativeOn, setNativeOn] = useState(false)
+  const fullscreen = expanded || nativeOn
+
+  useEffect(() => {
+    const onFs = () => setNativeOn(!!nativeFullscreenElement())
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExpanded(false)
+    }
+    document.addEventListener("fullscreenchange", onFs)
+    document.addEventListener("webkitfullscreenchange", onFs)
+    window.addEventListener("keydown", onKey)
+    return () => {
+      document.removeEventListener("fullscreenchange", onFs)
+      document.removeEventListener("webkitfullscreenchange", onFs)
+      window.removeEventListener("keydown", onKey)
+    }
+  }, [])
+
+  async function toggleFullscreen() {
+    const stage = stageRef.current
+    const video = videoHostRef.current?.querySelector("video")
+    if (!stage || !video) {
+      setExpanded((value) => !value)
+      return
+    }
+    if (fullscreen) {
+      await exitNativeFullscreen(video)
+      setExpanded(false)
+      return
+    }
+    const ok = await requestNativeFullscreen(stage, video)
+    if (!ok) setExpanded(true)
+  }
+
+  function skip(delta: number) {
+    const next = skipChannel(playlist, channel?.id, delta)
+    if (next) onSelect(next)
+  }
+
   if (!channel) {
     return (
       <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl bg-black text-white/70 ring-1 ring-white/10">
@@ -259,5 +246,39 @@ export function PlayerStage({ channel }: { channel: Channel | null }) {
       </div>
     )
   }
-  return <HlsPlayer key={channel.id} channel={channel} />
+
+  return (
+    <div
+      ref={stageRef}
+      className={cn(
+        "player-stage flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-black ring-1 ring-white/10",
+        expanded && "fixed inset-0 z-50 rounded-none ring-0",
+      )}
+    >
+      <div ref={videoHostRef} className="relative min-h-0 flex-1 bg-black">
+        <HlsPlayer key={channel.id} channel={channel} volume={volume} />
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start bg-gradient-to-b from-black/70 to-transparent p-4">
+          <div className="flex min-w-0 items-start gap-3">
+            <ChannelThumb name={channel.name} logo={channel.logo} className="size-10 ring-1 ring-white/15" />
+            <div className="min-w-0">
+              <p className="text-xs tracking-[0.2em] text-red-400">LIVE</p>
+              <h2 className="truncate text-lg font-medium text-white">{channel.name}</h2>
+              <p className="truncate text-xs text-white/60">{channel.group}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <PlayerControls
+        canSkip={playlist.length > 1}
+        volume={volume}
+        fullscreen={fullscreen}
+        onPrev={() => skip(-1)}
+        onNext={() => skip(1)}
+        onVolume={setVolume}
+        onFullscreen={() => {
+          void toggleFullscreen()
+        }}
+      />
+    </div>
+  )
 }

@@ -34,7 +34,12 @@ class ChannelAdapter(
         notifyDataSetChanged()
     }
 
-    fun firstChannel(): Channel? = rows.filterIsInstance<Row.Item>().firstOrNull()?.channel
+    fun skip(currentId: String?, delta: Int): Channel? {
+        val list = rows.mapNotNull { (it as? Row.Item)?.channel }
+        if (list.isEmpty()) return null
+        val index = list.indexOfFirst { it.id == currentId }.let { if (it < 0) 0 else it }
+        return list[(index + delta + list.size) % list.size]
+    }
 
     override fun getItemViewType(position: Int) = if (rows[position] is Row.Header) 0 else 1
     override fun getItemCount() = rows.size

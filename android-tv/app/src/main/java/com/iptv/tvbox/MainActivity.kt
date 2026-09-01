@@ -10,9 +10,9 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -46,7 +46,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progress: ProgressBar
     private lateinit var search: EditText
     private lateinit var countBadge: TextView
-    private lateinit var fullscreenButton: ImageButton
+    private lateinit var fullscreenButton: Button
+    private lateinit var volumeBar: SeekBar
     private var fullscreen = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +65,18 @@ class MainActivity : AppCompatActivity() {
         countBadge = findViewById(R.id.countBadge)
         fullscreenButton = findViewById(R.id.fullscreenButton)
         fullscreenButton.setOnClickListener { setFullscreen(!fullscreen) }
+        findViewById<Button>(R.id.prevChannel).setOnClickListener { skipChannel(-1) }
+        findViewById<Button>(R.id.nextChannel).setOnClickListener { skipChannel(1) }
+        volumeBar = findViewById(R.id.volumeBar)
+        volumeBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                player?.volume = progress / 100f
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
 
         onBackPressedDispatcher.addCallback(
             this,
@@ -134,6 +147,7 @@ class MainActivity : AppCompatActivity() {
         })
         findViewById<PlayerView>(R.id.playerView).player = exo
         player = exo
+        exo.volume = volumeBar.progress / 100f
     }
 
     private fun setFullscreen(on: Boolean) {
@@ -142,10 +156,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.topBar).visibility = vis
         findViewById<View>(R.id.channelPane).visibility = vis
         findViewById<View>(R.id.searchInput).visibility = vis
-        fullscreenButton.setImageResource(
-            if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen,
-        )
-        fullscreenButton.contentDescription = if (on) "退出全屏" else "全屏"
+        fullscreenButton.text = if (on) "退出全屏" else "全屏显示"
         applySystemBars(on)
     }
 
@@ -199,6 +210,10 @@ class MainActivity : AppCompatActivity() {
         exo.setMediaItem(MediaItem.fromUri(channel.url))
         exo.prepare()
         exo.play()
+    }
+
+    private fun skipChannel(delta: Int) {
+        adapter.skip(store.lastChannelId, delta)?.let { play(it) }
     }
 
     private fun importDefaults() {

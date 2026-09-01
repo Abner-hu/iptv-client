@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/playerControls"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#1C1917"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="6dp">
+
+    <HorizontalScrollView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/prevChannel"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:backgroundTint="#292524"
+                android:focusable="true"
+                android:minWidth="0dp"
+                android:nextFocusRight="@id/nextChannel"
+                android:paddingHorizontal="12dp"
+                android:text="上一个频道"
+                android:textColor="#F5F5F4"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/nextChannel"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="6dp"
+                android:backgroundTint="#292524"
+                android:focusable="true"
+                android:minWidth="0dp"
+                android:nextFocusLeft="@id/prevChannel"
+                android:nextFocusRight="@id/volumeBar"
+                android:paddingHorizontal="12dp"
+                android:text="下一个频道"
+                android:textColor="#F5F5F4"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="音量控制"
+                android:textColor="#A8A29E"
+                android:textSize="12sp" />
+
+            <SeekBar
+                android:id="@+id/volumeBar"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:focusable="true"
+                android:max="100"
+                android:progress="100"
+                android:progressTint="#FBBF24"
+                android:thumbTint="#FBBF24" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/fullscreenButton"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:backgroundTint="#D97706"
+        android:focusable="true"
+        android:minWidth="0dp"
+        android:paddingHorizontal="12dp"
+        android:text="全屏显示"
+        android:textColor="#1C1917"
+        android:textSize="13sp" />
+</LinearLayout>
