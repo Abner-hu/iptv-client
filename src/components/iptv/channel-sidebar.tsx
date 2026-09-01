@@ -2,6 +2,7 @@
 
 import { Star } from "lucide-react"
 
+import { ChannelThumb } from "@/components/iptv/channel-thumb"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import type { Channel } from "@/lib/iptv-types"
@@ -55,18 +56,7 @@ export function ChannelSidebar({
                         className="flex min-w-0 flex-1 items-center gap-2"
                         onClick={() => onSelect(channel)}
                       >
-                        {channel.logo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={channel.logo}
-                            alt=""
-                            className="size-7 rounded bg-black object-contain"
-                          />
-                        ) : (
-                          <span className="flex size-7 items-center justify-center rounded bg-muted text-[10px]">
-                            {channel.name.slice(0, 2)}
-                          </span>
-                        )}
+                        <ChannelThumb name={channel.name} logo={channel.logo} />
                         <span className="truncate">{channel.name}</span>
                       </button>
                       <button

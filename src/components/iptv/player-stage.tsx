@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Hls from "hls.js"
 import { Loader2, Maximize, Volume2, VolumeX, WifiOff } from "lucide-react"
 
+import { ChannelThumb } from "@/components/iptv/channel-thumb"
 import { Button } from "@/components/ui/button"
 import { proxiedStream } from "@/lib/iptv-fetch"
 import type { Channel } from "@/lib/iptv-types"
@@ -121,10 +122,13 @@ function HlsPlayer({ channel }: { channel: Channel }) {
       )}
 
       <div className="absolute inset-x-0 top-0 flex items-start justify-between bg-gradient-to-b from-black/70 to-transparent p-4">
-        <div>
-          <p className="text-xs tracking-[0.2em] text-red-400">LIVE</p>
-          <h2 className="text-lg font-medium text-white">{channel.name}</h2>
-          <p className="text-xs text-white/60">{channel.group}</p>
+        <div className="flex min-w-0 items-start gap-3">
+          <ChannelThumb name={channel.name} logo={channel.logo} className="size-10 ring-1 ring-white/15" />
+          <div className="min-w-0">
+            <p className="text-xs tracking-[0.2em] text-red-400">LIVE</p>
+            <h2 className="truncate text-lg font-medium text-white">{channel.name}</h2>
+            <p className="truncate text-xs text-white/60">{channel.group}</p>
+          </div>
         </div>
         <div className="flex gap-1">
           <Button

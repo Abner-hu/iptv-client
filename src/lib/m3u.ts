@@ -31,7 +31,7 @@ export function parseM3u(text: string, sourceId: string): Channel[] {
       pending = {
         name,
         group: attr(meta, "group-title")?.trim() || "未分组",
-        logo: attr(meta, "tvg-logo"),
+        logo: attr(meta, "tvg-logo") || attr(meta, "logo"),
         tvgId: attr(meta, "tvg-id"),
         sourceId,
       }

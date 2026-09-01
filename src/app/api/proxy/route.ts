@@ -31,7 +31,10 @@ export async function GET(request: Request) {
     const headers = new Headers()
     const contentType = upstream.headers.get("content-type")
     if (contentType) headers.set("content-type", contentType)
-    headers.set("cache-control", "no-store")
+    headers.set(
+      "cache-control",
+      contentType?.startsWith("image/") ? "public, max-age=86400" : "no-store",
+    )
     headers.set("access-control-allow-origin", "*")
 
     return new Response(upstream.body, {

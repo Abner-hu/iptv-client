@@ -5,6 +5,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -69,11 +70,13 @@ class ChannelAdapter(
     inner class ItemHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val name = view.findViewById<TextView>(R.id.channelName)
         private val group = view.findViewById<TextView>(R.id.channelGroup)
+        private val logo = view.findViewById<ImageView>(R.id.channelLogo)
         private val card = view.findViewById<LinearLayout>(R.id.channelCard)
 
         fun bind(channel: Channel) {
             name.text = channel.name
             group.text = channel.group
+            LogoLoader.bind(logo, channel.logo)
             val selected = channel.id == selectedId
             card.isSelected = selected
             card.setBackgroundColor(

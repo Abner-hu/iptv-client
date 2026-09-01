@@ -16,7 +16,8 @@ object M3uParser {
                 pendingName = (if (comma >= 0) line.substring(comma + 1) else "未命名频道").trim()
                     .ifEmpty { "未命名频道" }
                 pendingGroup = attr(meta, "group-title")?.trim().orEmpty().ifEmpty { "未分组" }
-                pendingLogo = attr(meta, "tvg-logo")
+                pendingLogo = attr(meta, "tvg-logo")?.ifBlank { null }
+                    ?: attr(meta, "logo")?.ifBlank { null }
                 return@forEach
             }
             if (line.startsWith("#")) return@forEach
