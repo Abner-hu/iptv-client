@@ -152,8 +152,8 @@ export function IptvApp() {
           </Button>
         )}
         <Button size="sm" asChild>
-          <a href="/iptv-tv.apk" download="IPTV终端-电视版.apk">
-            电视 APK
+          <a href="/iptv-tv.apk" download="IPTV终端.apk">
+            下载 APK
           </a>
         </Button>
         <Button size="sm" onClick={() => setImportOpen(true)}>
@@ -193,13 +193,13 @@ export function IptvApp() {
                   选择更多列表
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="/iptv-tv.apk" download="IPTV终端-电视版.apk">
-                    下载电视安装包 (APK)
+                  <a href="/iptv-tv.apk" download="IPTV终端.apk">
+                    下载 APK（电视 / 手机）
                   </a>
                 </Button>
               </div>
               <p className="mt-4 max-w-md text-xs text-muted-foreground">
-                安卓电视 / 小米 / 海信 / TCL / 创维：用 U 盘或「当贝市场 / 应用安装器」安装 APK。遥控器上下选台，确认键播放。
+                同一 APK 可装安卓电视和安卓手机。电视用 U 盘或当贝市场；手机打开文件并允许未知来源即可。
               </p>
             </div>
           ) : (
