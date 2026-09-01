@@ -236,7 +236,7 @@ function HlsPlayer({ channel }: { channel: Channel }) {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="size-9 text-white hover:bg-white/15 hover:text-white md:size-8"
+            className="text-white hover:bg-white/15 hover:text-white"
             aria-label={fullscreen ? "退出全屏" : "全屏"}
             onClick={() => {
               void toggleFullscreen()
@@ -246,17 +246,6 @@ function HlsPlayer({ channel }: { channel: Channel }) {
           </Button>
         </div>
       </div>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        className="absolute right-3 bottom-3 size-11 bg-black/55 text-white hover:bg-black/75 hover:text-white md:hidden"
-        aria-label={fullscreen ? "退出全屏" : "全屏"}
-        onClick={() => {
-          void toggleFullscreen()
-        }}
-      >
-        {fullscreen ? <Minimize /> : <Maximize />}
-      </Button>
     </div>
   )
 }
