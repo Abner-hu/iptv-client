@@ -1,5 +1,7 @@
 # IPTV 终端
 
+仓库：[github.com/Abner-hu/iptv-client](https://github.com/Abner-hu/iptv-client)
+
 机顶盒风格的 IPTV 播放器：导入公开 M3U 列表、按分组浏览频道，并用 HLS 播放直播。
 
 内置 [iptv-org](https://github.com/iptv-org/iptv) 公开源（中国内地、香港、台湾、中文、新闻、体育等）。这些是版权方公开的直播地址，部分频道会因地区、线路或时效无法播放。
@@ -9,6 +11,8 @@
 需要 Node.js 20+。
 
 ```bash
+git clone https://github.com/Abner-hu/iptv-client.git
+cd iptv-client
 npm install
 npm run dev
 ```
