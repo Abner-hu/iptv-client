@@ -34,7 +34,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="IPTV 终端"
+                android:text="IPTV Client"
                 android:textColor="#F5F5F4"
                 android:textSize="16sp"
                 android:textStyle="bold" />

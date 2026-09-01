@@ -122,7 +122,7 @@ export function IptvApp() {
           <Radio className="size-4" />
         </span>
         <div className="leading-tight">
-          <h1 className="text-sm font-semibold tracking-wide">IPTV 终端</h1>
+          <h1 className="text-sm font-semibold tracking-wide">IPTV Client</h1>
           <p className="text-[11px] text-muted-foreground">公开 M3U 直播播放器</p>
         </div>
         <Badge variant="secondary" className="hidden sm:inline-flex">

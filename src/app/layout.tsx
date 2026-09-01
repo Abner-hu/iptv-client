@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "IPTV 终端",
+  title: "IPTV Client",
   description: "导入公开 M3U 播放列表并观看直播频道。",
 }
 

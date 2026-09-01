@@ -20,7 +20,7 @@ function createWindow() {
     minWidth: 960,
     minHeight: 640,
     backgroundColor: "#0b0b0d",
-    title: "IPTV 终端",
+    title: "IPTV Client",
     autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
