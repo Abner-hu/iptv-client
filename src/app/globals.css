@@ -99,3 +99,12 @@
     outline-offset: 2px;
   }
 }
+
+.player-stage:fullscreen,
+.player-stage:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  max-height: none;
+  border-radius: 0;
+  background: #000;
+}

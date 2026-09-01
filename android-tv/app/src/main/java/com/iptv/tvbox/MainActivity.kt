@@ -1,16 +1,21 @@
 package com.iptv.tvbox
 
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
@@ -41,6 +46,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progress: ProgressBar
     private lateinit var search: EditText
     private lateinit var countBadge: TextView
+    private lateinit var fullscreenButton: ImageButton
+    private var fullscreen = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +62,23 @@ class MainActivity : AppCompatActivity() {
         progress = findViewById(R.id.progress)
         search = findViewById(R.id.searchInput)
         countBadge = findViewById(R.id.countBadge)
+        fullscreenButton = findViewById(R.id.fullscreenButton)
+        fullscreenButton.setOnClickListener { setFullscreen(!fullscreen) }
+
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (fullscreen) {
+                        setFullscreen(false)
+                    } else {
+                        isEnabled = false
+                        onBackPressedDispatcher.onBackPressed()
+                        isEnabled = true
+                    }
+                }
+            },
+        )
 
         adapter = ChannelAdapter { play(it) }
         findViewById<RecyclerView>(R.id.channelList).apply {
@@ -110,6 +134,46 @@ class MainActivity : AppCompatActivity() {
         })
         findViewById<PlayerView>(R.id.playerView).player = exo
         player = exo
+    }
+
+    private fun setFullscreen(on: Boolean) {
+        fullscreen = on
+        val vis = if (on) View.GONE else View.VISIBLE
+        findViewById<View>(R.id.topBar).visibility = vis
+        findViewById<View>(R.id.channelPane).visibility = vis
+        findViewById<View>(R.id.searchInput).visibility = vis
+        fullscreenButton.setImageResource(
+            if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen,
+        )
+        fullscreenButton.contentDescription = if (on) "退出全屏" else "全屏"
+        applySystemBars(on)
+    }
+
+    private fun applySystemBars(on: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val controller = window.insetsController ?: return
+            if (on) {
+                controller.hide(WindowInsets.Type.systemBars())
+                controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            } else {
+                controller.show(WindowInsets.Type.systemBars())
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = if (on) {
+                (
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    )
+            } else {
+                View.SYSTEM_UI_FLAG_VISIBLE
+            }
+        }
     }
 
     private fun render() {

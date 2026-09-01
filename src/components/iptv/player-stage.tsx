@@ -2,23 +2,76 @@
 
 import { useEffect, useRef, useState } from "react"
 import Hls from "hls.js"
-import { Loader2, Maximize, Volume2, VolumeX, WifiOff } from "lucide-react"
+import { Loader2, Maximize, Minimize, Volume2, VolumeX, WifiOff } from "lucide-react"
 
 import { ChannelThumb } from "@/components/iptv/channel-thumb"
 import { Button } from "@/components/ui/button"
 import { proxiedStream } from "@/lib/iptv-fetch"
+import { cn } from "@/lib/utils"
 import type { Channel } from "@/lib/iptv-types"
+
+type WebkitVideo = HTMLVideoElement & {
+  webkitEnterFullscreen?: () => void
+  webkitExitFullscreen?: () => void
+  webkitDisplayingFullscreen?: boolean
+}
+
+type WebkitElement = HTMLElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void
+}
+
+type WebkitDocument = Document & {
+  webkitFullscreenElement?: Element | null
+  webkitExitFullscreen?: () => Promise<void> | void
+}
 
 function rewrite(url: string) {
   if (url.includes("/api/proxy?url=")) return url
   return proxiedStream(url)
 }
 
+function nativeFullscreenElement() {
+  const doc = document as WebkitDocument
+  return document.fullscreenElement ?? doc.webkitFullscreenElement ?? null
+}
+
+async function requestNativeFullscreen(node: HTMLElement, video: HTMLVideoElement) {
+  const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+  const webkitVideo = video as WebkitVideo
+  if (ios && typeof webkitVideo.webkitEnterFullscreen === "function") {
+    webkitVideo.webkitEnterFullscreen()
+    return true
+  }
+  const el = node as WebkitElement
+  const request = el.requestFullscreen?.bind(el) ?? el.webkitRequestFullscreen?.bind(el)
+  if (!request) return false
+  try {
+    await Promise.resolve(request())
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function exitNativeFullscreen(video: HTMLVideoElement) {
+  const webkitVideo = video as WebkitVideo
+  if (webkitVideo.webkitDisplayingFullscreen && webkitVideo.webkitExitFullscreen) {
+    webkitVideo.webkitExitFullscreen()
+    return
+  }
+  const doc = document as WebkitDocument
+  const exit = document.exitFullscreen?.bind(document) ?? doc.webkitExitFullscreen?.bind(document)
+  if (exit) await Promise.resolve(exit())
+}
+
 function HlsPlayer({ channel }: { channel: Channel }) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [buffering, setBuffering] = useState(true)
   const [muted, setMuted] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const [nativeOn, setNativeOn] = useState(false)
 
   useEffect(() => {
     const video = videoRef.current
@@ -83,11 +136,54 @@ function HlsPlayer({ channel }: { channel: Channel }) {
     }
   }, [channel])
 
+  useEffect(() => {
+    const onFs = () => setNativeOn(!!nativeFullscreenElement())
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExpanded(false)
+    }
+    document.addEventListener("fullscreenchange", onFs)
+    document.addEventListener("webkitfullscreenchange", onFs)
+    window.addEventListener("keydown", onKey)
+    const video = videoRef.current
+    const onBegin = () => setNativeOn(true)
+    const onEnd = () => setNativeOn(false)
+    video?.addEventListener("webkitbeginfullscreen", onBegin)
+    video?.addEventListener("webkitendfullscreen", onEnd)
+    return () => {
+      document.removeEventListener("fullscreenchange", onFs)
+      document.removeEventListener("webkitfullscreenchange", onFs)
+      window.removeEventListener("keydown", onKey)
+      video?.removeEventListener("webkitbeginfullscreen", onBegin)
+      video?.removeEventListener("webkitendfullscreen", onEnd)
+    }
+  }, [])
+
+  const fullscreen = expanded || nativeOn
+
+  async function toggleFullscreen() {
+    const video = videoRef.current
+    const stage = stageRef.current
+    if (!video || !stage) return
+    if (fullscreen) {
+      await exitNativeFullscreen(video)
+      setExpanded(false)
+      return
+    }
+    const ok = await requestNativeFullscreen(stage, video)
+    if (!ok) setExpanded(true)
+  }
+
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-black ring-1 ring-white/10">
+    <div
+      ref={stageRef}
+      className={cn(
+        "player-stage relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-black ring-1 ring-white/10",
+        expanded && "fixed inset-0 z-50 rounded-none ring-0",
+      )}
+    >
       <video
         ref={videoRef}
-        className="h-full w-full bg-black object-contain"
+        className="h-full min-h-48 w-full bg-black object-contain md:min-h-0"
         controls={false}
         autoPlay
         playsInline
@@ -99,10 +195,7 @@ function HlsPlayer({ channel }: { channel: Channel }) {
           else video.pause()
         }}
         onDoubleClick={() => {
-          const node = videoRef.current?.parentElement
-          if (!node) return
-          if (document.fullscreenElement) void document.exitFullscreen()
-          else void node.requestFullscreen()
+          void toggleFullscreen()
         }}
       />
 
@@ -143,19 +236,27 @@ function HlsPlayer({ channel }: { channel: Channel }) {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="text-white hover:bg-white/15 hover:text-white"
-            aria-label="全屏"
+            className="size-9 text-white hover:bg-white/15 hover:text-white md:size-8"
+            aria-label={fullscreen ? "退出全屏" : "全屏"}
             onClick={() => {
-              const node = videoRef.current?.parentElement
-              if (!node) return
-              if (document.fullscreenElement) void document.exitFullscreen()
-              else void node.requestFullscreen()
+              void toggleFullscreen()
             }}
           >
-            <Maximize />
+            {fullscreen ? <Minimize /> : <Maximize />}
           </Button>
         </div>
       </div>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="absolute right-3 bottom-3 size-11 bg-black/55 text-white hover:bg-black/75 hover:text-white md:hidden"
+        aria-label={fullscreen ? "退出全屏" : "全屏"}
+        onClick={() => {
+          void toggleFullscreen()
+        }}
+      >
+        {fullscreen ? <Minimize /> : <Maximize />}
+      </Button>
     </div>
   )
 }

@@ -7,6 +7,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -159,6 +160,7 @@
             android:visibility="gone">
 
             <LinearLayout
+                android:id="@+id/channelPane"
                 android:layout_width="360dp"
                 android:layout_height="match_parent"
                 android:background="#121110"
@@ -187,6 +189,7 @@
             </LinearLayout>
 
             <FrameLayout
+                android:id="@+id/playerShell"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -198,10 +201,12 @@
                     android:layout_height="match_parent"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                    app:resize_mode="fit"
                     app:show_buffering="never"
                     app:use_controller="false" />
 
                 <LinearLayout
+                    android:id="@+id/playerMeta"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#99000000"
@@ -212,7 +217,7 @@
                         android:id="@+id/nowPlaying"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="IPTV 终端"
+                        android:text="IPTV Client"
                         android:textColor="#FFFFFF"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -225,6 +230,19 @@
                         android:textColor="#D6D3D1"
                         android:textSize="14sp" />
                 </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/fullscreenButton"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="16dp"
+                    android:background="#99000000"
+                    android:contentDescription="全屏"
+                    android:focusable="true"
+                    android:nextFocusLeft="@id/channelList"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_fullscreen" />
             </FrameLayout>
         </LinearLayout>
 
