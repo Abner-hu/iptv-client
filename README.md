@@ -33,13 +33,13 @@ npm run apk
 
 生成：
 
-- `release/iptv-client.v<版本号>.apk`（当前为 `iptv-client.v1.0.4.apk`）
-- 开发服务器也可下载： [http://127.0.0.1:43217/iptv-client.v1.0.4.apk](http://127.0.0.1:43217/iptv-client.v1.0.4.apk)
+- `release/iptv-client.v<版本号>.apk`（当前为 `iptv-client.v1.0.5.apk`）
+- 开发服务器也可下载： [http://127.0.0.1:43217/iptv-client.v1.0.5.apk](http://127.0.0.1:43217/iptv-client.v1.0.5.apk)
 
 ### 装到电视上
 
 1. 把 APK 拷到 U 盘，插电视。
-2. 打开电视自带的「文件管理 / USB」，安装 **IPTV终端**。
+2. 打开电视自带的「文件管理 / USB」，安装 **IPTV Client**。
 3. 若提示未知来源，到设置里允许安装未知应用。
 4. 也可用 **当贝市场、酷市场、应用安装器、小米电视助手** 侧载。
 
@@ -47,9 +47,9 @@ npm run apk
 
 ### 装到安卓手机
 
-1. 把 `iptv-client.v1.0.4.apk` 发到手机（微信/网盘/数据线）。
+1. 把 `iptv-client.v1.0.5.apk` 发到手机（微信/网盘/数据线）。
 2. 打开文件，允许「安装未知应用」。
-3. 安装完成后在桌面打开 **IPTV终端**。
+3. 安装完成后在桌面打开 **IPTV Client**。
 4. 竖屏为播放器在上、频道列表在下；横屏与电视相同，左侧列表、右侧画面。
 
 Android 5.0 及以上即可，覆盖目前几乎所有手机。
