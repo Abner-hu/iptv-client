@@ -1,17 +1,10 @@
-# 智体工坊 · Agent Studio
+# IPTV 终端
 
-本地优先的 Agent 开发工作台：设计系统提示词、装配工具、在操场里跑通「思考 → 调用工具 → 回答」循环，并查看每一步轨迹。
+机顶盒风格的 IPTV 播放器：导入公开 M3U 列表、按分组浏览频道，并用 HLS 播放直播。
 
-## 能做什么
+内置 [iptv-org](https://github.com/iptv-org/iptv) 公开源（中国内地、香港、台湾、中文、新闻、体育等）。这些是版权方公开的直播地址，部分频道会因地区、线路或时效无法播放。
 
-- 管理多个 Agent（新建、复制、删除）
-- 编辑人设、温度、模型名，开关内置工具
-- 用演示引擎调试（无需 API Key）：计算器、时区、Agent 知识库、笔记
-- 可选接入 OpenAI 兼容接口（密钥只存在浏览器本地，经 `/api/chat` 转发）
-
-预置了三个 Agent：**研究助理**、**运算顾问**、**提示词教练**。
-
-## 本地运行
+## 运行
 
 需要 Node.js 20+。
 
@@ -22,22 +15,27 @@ npm run dev
 
 浏览器打开 [http://127.0.0.1:43217](http://127.0.0.1:43217)。
 
-生产构建：
+点 **导入已知源（中国 + 香港）**，或 **导入 M3U** 勾选更多公开列表、粘贴自定义地址、打开本地 `.m3u` 文件。
+
+## 桌面窗口 / Windows exe
+
+先启动播放服务，再打开 Electron 窗口：
 
 ```bash
-npm run build
-npm start
+npm run dev
+npm run desktop
 ```
 
-## 接入真实模型
+Windows 上可打包便携版 exe（只是外壳窗口，仍需本机 `npm run start` 提供播放服务）：
 
-1. 打开右上角 **模型设置**
-2. 运行模式选 **OpenAI 兼容接口**
-3. 填写 Base URL（默认 `https://api.openai.com/v1`）、API Key、默认模型
-4. 回到操场发一条消息
+```bash
+npm run dist:win
+```
 
-未填写密钥时会自动回退到演示引擎。
+生成文件在 `release/IPTV终端*.exe`。也可以双击 `scripts/start-iptv.bat`（需已 `npm install`）。
 
-## 数据
+## 说明
 
-Agent、对话和笔记保存在浏览器 `localStorage`，不会上传。换浏览器或清站点数据会丢失。
+- 播放走 `/api/proxy`，避免浏览器跨域拦住直播流。
+- 列表与收藏存在本机 `localStorage`。
+- 公开源经常变动，打不开就换频道，或导入你自己的 M3U。

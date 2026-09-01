@@ -1,5 +1,5 @@
-import { GalleryView } from "@/components/gallery/gallery-view"
+import { IptvApp } from "@/components/iptv/iptv-app"
 
 export default function HomePage() {
-  return <GalleryView />
+  return <IptvApp />
 }

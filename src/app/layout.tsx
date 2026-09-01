@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "智体工坊 · Agent Studio",
-  description: "设计、调试、迭代 AI Agent 的本地工作台。",
+  title: "IPTV 终端",
+  description: "导入公开 M3U 播放列表并观看直播频道。",
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
