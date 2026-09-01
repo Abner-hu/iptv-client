@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { APK_FILENAME } from "@/lib/apk"
 import { downloadPlaylist } from "@/lib/iptv-fetch"
 import { DEFAULT_IMPORT_IDS, KNOWN_PLAYLISTS } from "@/lib/known-playlists"
 import { groupChannels, parseM3u } from "@/lib/m3u"
@@ -161,7 +162,7 @@ export function IptvApp() {
           </Button>
         )}
         <Button size="sm" asChild>
-          <a href="/iptv-tv.apk" download="IPTV终端.apk">
+          <a href={`/${APK_FILENAME}`} download={APK_FILENAME}>
             下载 APK
           </a>
         </Button>
@@ -206,7 +207,7 @@ export function IptvApp() {
                   选择更多列表
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="/iptv-tv.apk" download="IPTV终端.apk">
+                  <a href={`/${APK_FILENAME}`} download={APK_FILENAME}>
                     下载 APK（电视 / 手机）
                   </a>
                 </Button>

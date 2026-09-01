@@ -16,7 +16,15 @@ mkdir -p "$ROOT/release" "$ROOT/public"
 cd "$ROOT/android-tv"
 ./gradlew assembleRelease --no-daemon
 APK="$(find app/build/outputs/apk/release -name '*.apk' | head -n 1)"
-cp -f "$APK" "$ROOT/release/IPTV终端-电视版.apk"
-cp -f "$APK" "$ROOT/public/iptv-tv.apk"
-echo "APK: $ROOT/release/IPTV终端-电视版.apk"
-echo "也可通过 http://127.0.0.1:43217/iptv-tv.apk 下载"
+VERSION="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n 1)"
+if [ -z "$VERSION" ]; then
+  echo "无法从 app/build.gradle.kts 读取 versionName"
+  exit 1
+fi
+NAME="iptv-client.v${VERSION}.apk"
+rm -f "$ROOT/public"/iptv-client.v*.apk "$ROOT/public/iptv-tv.apk"
+rm -f "$ROOT/release"/iptv-client.v*.apk "$ROOT/release"/IPTV终端-电视版.apk
+cp -f "$APK" "$ROOT/release/$NAME"
+cp -f "$APK" "$ROOT/public/$NAME"
+echo "APK: $ROOT/release/$NAME"
+echo "也可通过 http://127.0.0.1:43217/$NAME 下载"
