@@ -38,6 +38,7 @@ class PlaylistStore(context: Context) {
     }
 
     fun importUrl(id: String, name: String, url: String): Int {
+        if (!SafeUri.isPlaylist(url)) error("只允许从 http/https 导入播放列表")
         val body = download(url)
         val parsed = M3uParser.parse(body, id)
         if (parsed.isEmpty()) error("没有解析到频道")
@@ -99,12 +100,14 @@ class PlaylistStore(context: Context) {
             val clist = root.optJSONArray("channels") ?: JSONArray()
             for (i in 0 until clist.length()) {
                 val item = clist.getJSONObject(i)
+                val url = item.getString("url")
+                if (!SafeUri.isStream(url)) continue
                 channels += Channel(
                     id = item.getString("id"),
                     name = item.getString("name"),
-                    url = item.getString("url"),
+                    url = url,
                     group = item.optString("group", "未分组"),
-                    logo = item.optString("logo").ifBlank { null },
+                    logo = item.optString("logo").ifBlank { null }?.takeIf { SafeUri.isHttpImage(it) },
                     sourceId = item.optString("sourceId"),
                 )
             }

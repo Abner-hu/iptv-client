@@ -27,7 +27,7 @@ object LogoLoader {
         view.setImageResource(R.drawable.ic_channel_default)
         val target = url?.trim().orEmpty()
         view.tag = target
-        if (target.isEmpty() || !(target.startsWith("http://") || target.startsWith("https://"))) {
+        if (target.isEmpty() || !SafeUri.isHttpImage(target)) {
             return
         }
         memory.get(target)?.let { cached ->

@@ -1,5 +1,6 @@
 package com.iptv.tvbox
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sanitizeLaunchIntent()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContentView(R.layout.activity_main)
         store = PlaylistStore(this)
@@ -127,6 +129,19 @@ class MainActivity : AppCompatActivity() {
         render()
         store.current()?.let { play(it) }
         findViewById<Button>(R.id.importKnown).requestFocus()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        sanitizeLaunchIntent()
+    }
+
+    private fun sanitizeLaunchIntent() {
+        val incoming = intent ?: return
+        if (incoming.action != null && incoming.action != Intent.ACTION_MAIN) {
+            setIntent(Intent(this, MainActivity::class.java).setAction(Intent.ACTION_MAIN))
+        }
     }
 
     private fun setupPlayer() {
@@ -233,6 +248,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun play(channel: Channel) {
+        if (!SafeUri.isStream(channel.url)) {
+            status.text = "频道地址不安全，已拒绝播放"
+            progress.visibility = View.GONE
+            return
+        }
         store.setCurrent(channel.id)
         adapter.selectedId = channel.id
         nowPlaying.text = channel.name

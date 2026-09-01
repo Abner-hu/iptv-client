@@ -33,8 +33,8 @@ npm run apk
 
 生成：
 
-- `release/iptv-client.v<版本号>.apk`（当前为 `iptv-client.v1.0.7.apk`）
-- 开发服务器也可下载： [http://127.0.0.1:43217/iptv-client.v1.0.7.apk](http://127.0.0.1:43217/iptv-client.v1.0.7.apk)
+- `release/iptv-client.v<版本号>.apk`（当前为 `iptv-client.v1.0.8.apk`）
+- 开发服务器也可下载： [http://127.0.0.1:43217/iptv-client.v1.0.8.apk](http://127.0.0.1:43217/iptv-client.v1.0.8.apk)
 
 ### 装到电视上
 
@@ -47,7 +47,7 @@ npm run apk
 
 ### 装到安卓手机
 
-1. 把 `iptv-client.v1.0.7.apk` 发到手机（微信/网盘/数据线）。
+1. 把 `iptv-client.v1.0.8.apk` 发到手机（微信/网盘/数据线）。
 2. 打开文件，允许「安装未知应用」。
 3. 安装完成后在桌面打开 **IPTV Client**。
 4. 竖屏为播放器在上、频道列表在下；横屏与电视相同，左侧列表、右侧画面。
@@ -78,3 +78,4 @@ npm run dist:win
 - 播放走 `/api/proxy`，避免浏览器跨域拦住直播流。
 - 列表与收藏存在本机 `localStorage`。
 - 公开源经常变动，打不开就换频道，或导入你自己的 M3U。
+- 电视/手机安装包关闭系统备份，只播放 http(s)/RTSP/RTMP，不接收其它应用传来的播放链接。

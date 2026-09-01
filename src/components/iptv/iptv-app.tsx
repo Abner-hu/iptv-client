@@ -119,8 +119,8 @@ export function IptvApp() {
   return (
     <div className="flex h-dvh min-h-0 flex-col bg-background">
       <header className="flex items-center gap-3 border-b border-white/10 px-4 py-2.5">
-        <span className="flex size-8 items-center justify-center rounded-md bg-red-600 text-white shadow-[0_0_20px_color-mix(in_oklch,red_40%,transparent)]">
-          <Radio className="size-4" />
+        <span className="flex size-8 items-center justify-center rounded-md bg-red-600 text-[13px] font-bold tracking-tight text-white shadow-[0_0_20px_color-mix(in_oklch,red_40%,transparent)]">
+          I&gt;
         </span>
         <div className="leading-tight">
           <h1 className="text-sm font-semibold tracking-wide">IPTV Client</h1>
