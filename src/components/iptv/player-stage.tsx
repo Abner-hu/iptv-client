@@ -74,9 +74,11 @@ function skipChannel(playlist: Channel[], currentId: string | undefined, delta: 
 function HlsPlayer({
   channel,
   volume,
+  onVideoClick,
 }: {
   channel: Channel
   volume: number
+  onVideoClick?: (video: HTMLVideoElement) => boolean
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [error, setError] = useState<string | null>(null)
@@ -163,6 +165,7 @@ function HlsPlayer({
         onClick={() => {
           const video = videoRef.current
           if (!video) return
+          if (onVideoClick?.(video)) return
           if (video.paused) void video.play()
           else video.pause()
         }}
@@ -200,12 +203,26 @@ export function PlayerStage({
   const [volume, setVolume] = useState(1)
   const [expanded, setExpanded] = useState(false)
   const [nativeOn, setNativeOn] = useState(false)
+  const [chromeVisible, setChromeVisible] = useState(true)
   const fullscreen = expanded || nativeOn
+  const fullscreenRef = useRef(false)
+  const idleTimer = useRef<number>(0)
+  fullscreenRef.current = fullscreen
+
+  function bumpChrome() {
+    setChromeVisible(true)
+    window.clearTimeout(idleTimer.current)
+    if (!fullscreenRef.current) return
+    idleTimer.current = window.setTimeout(() => {
+      if (fullscreenRef.current) setChromeVisible(false)
+    }, 5000)
+  }
 
   useEffect(() => {
     const onFs = () => setNativeOn(!!nativeFullscreenElement())
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setExpanded(false)
+      bumpChrome()
     }
     document.addEventListener("fullscreenchange", onFs)
     document.addEventListener("webkitfullscreenchange", onFs)
@@ -216,6 +233,24 @@ export function PlayerStage({
       window.removeEventListener("keydown", onKey)
     }
   }, [])
+
+  useEffect(() => {
+    if (!fullscreen) {
+      window.clearTimeout(idleTimer.current)
+      setChromeVisible(true)
+      return
+    }
+    bumpChrome()
+    const stage = stageRef.current
+    if (!stage) return
+    const onActivity = () => bumpChrome()
+    stage.addEventListener("mousemove", onActivity)
+    stage.addEventListener("pointerdown", onActivity)
+    return () => {
+      stage.removeEventListener("mousemove", onActivity)
+      stage.removeEventListener("pointerdown", onActivity)
+    }
+  }, [fullscreen])
 
   async function toggleFullscreen() {
     const stage = stageRef.current
@@ -253,32 +288,57 @@ export function PlayerStage({
       className={cn(
         "player-stage flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-black ring-1 ring-white/10",
         expanded && "fixed inset-0 z-50 rounded-none ring-0",
+        fullscreen && !chromeVisible && "cursor-none",
       )}
     >
       <div ref={videoHostRef} className="relative min-h-0 flex-1 bg-black">
-        <HlsPlayer key={channel.id} channel={channel} volume={volume} />
-        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start bg-gradient-to-b from-black/70 to-transparent p-4">
+        <HlsPlayer
+          key={channel.id}
+          channel={channel}
+          volume={volume}
+          onVideoClick={() => {
+            if (!fullscreen) return false
+            if (!chromeVisible) {
+              bumpChrome()
+              return true
+            }
+            return false
+          }}
+        />
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-x-0 top-0 flex items-start bg-gradient-to-b from-black/70 to-transparent p-4 transition-opacity duration-300",
+            fullscreen && !chromeVisible && "opacity-0",
+          )}
+        >
           <div className="flex min-w-0 items-start gap-3">
             <ChannelThumb name={channel.name} logo={channel.logo} className="size-10 ring-1 ring-white/15" />
             <div className="min-w-0">
-              <p className="text-xs tracking-[0.2em] text-red-400">LIVE</p>
+              <p className="text-xs tracking-[0.2em] text-red-400">正在直播</p>
               <h2 className="truncate text-lg font-medium text-white">{channel.name}</h2>
               <p className="truncate text-xs text-white/60">{channel.group}</p>
             </div>
           </div>
         </div>
       </div>
-      <PlayerControls
-        canSkip={playlist.length > 1}
-        volume={volume}
-        fullscreen={fullscreen}
-        onPrev={() => skip(-1)}
-        onNext={() => skip(1)}
-        onVolume={setVolume}
-        onFullscreen={() => {
-          void toggleFullscreen()
-        }}
-      />
+      <div
+        className={cn(
+          "shrink-0",
+          fullscreen && !chromeVisible && "hidden",
+        )}
+      >
+        <PlayerControls
+          canSkip={playlist.length > 1}
+          volume={volume}
+          fullscreen={fullscreen}
+          onPrev={() => skip(-1)}
+          onNext={() => skip(1)}
+          onVolume={setVolume}
+          onFullscreen={() => {
+            void toggleFullscreen()
+          }}
+        />
+      </div>
     </div>
   )
 }

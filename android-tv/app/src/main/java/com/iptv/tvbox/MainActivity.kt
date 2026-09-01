@@ -4,6 +4,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -33,6 +35,9 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        private const val CHROME_IDLE_MS = 5000L
+    }
     private val io = Executors.newSingleThreadExecutor()
     private val main = Handler(Looper.getMainLooper())
     private lateinit var store: PlaylistStore
@@ -48,7 +53,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var countBadge: TextView
     private lateinit var fullscreenButton: Button
     private lateinit var volumeBar: SeekBar
+    private lateinit var playerMeta: View
+    private lateinit var playerControls: View
     private var fullscreen = false
+    private val hideChrome = Runnable {
+        if (fullscreen) setChromeVisible(false)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +75,8 @@ class MainActivity : AppCompatActivity() {
         countBadge = findViewById(R.id.countBadge)
         fullscreenButton = findViewById(R.id.fullscreenButton)
         fullscreenButton.setOnClickListener { setFullscreen(!fullscreen) }
+        playerMeta = findViewById(R.id.playerMeta)
+        playerControls = findViewById(R.id.playerControls)
         findViewById<Button>(R.id.prevChannel).setOnClickListener { skipChannel(-1) }
         findViewById<Button>(R.id.nextChannel).setOnClickListener { skipChannel(1) }
         volumeBar = findViewById(R.id.volumeBar)
@@ -73,9 +85,13 @@ class MainActivity : AppCompatActivity() {
                 player?.volume = progress / 100f
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                bumpChrome()
+            }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                bumpChrome()
+            }
         })
 
         onBackPressedDispatcher.addCallback(
@@ -158,6 +174,22 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.searchInput).visibility = vis
         fullscreenButton.text = if (on) "退出全屏" else "全屏显示"
         applySystemBars(on)
+        if (on) bumpChrome() else {
+            main.removeCallbacks(hideChrome)
+            setChromeVisible(true)
+        }
+    }
+
+    private fun bumpChrome() {
+        setChromeVisible(true)
+        main.removeCallbacks(hideChrome)
+        if (fullscreen) main.postDelayed(hideChrome, CHROME_IDLE_MS)
+    }
+
+    private fun setChromeVisible(on: Boolean) {
+        val vis = if (on) View.VISIBLE else View.GONE
+        playerMeta.visibility = vis
+        playerControls.visibility = vis
     }
 
     private fun applySystemBars(on: Boolean) {
@@ -210,6 +242,7 @@ class MainActivity : AppCompatActivity() {
         exo.setMediaItem(MediaItem.fromUri(channel.url))
         exo.prepare()
         exo.play()
+        if (fullscreen) bumpChrome()
     }
 
     private fun skipChannel(delta: Int) {
@@ -303,12 +336,23 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.importEmptyMore).isEnabled = !on
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (fullscreen && ev.action == MotionEvent.ACTION_DOWN) bumpChrome()
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (fullscreen && event.action == KeyEvent.ACTION_DOWN) bumpChrome()
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun onStop() {
         super.onStop()
         player?.pause()
     }
 
     override fun onDestroy() {
+        main.removeCallbacks(hideChrome)
         player?.release()
         player = null
         super.onDestroy()
