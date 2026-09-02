@@ -2,7 +2,8 @@
 """Generate IPTV Client launcher / banner / favicon art.
 
 Red rounded square, thick black frame, white I stem, uniform-width white >
-chevron, and a white dot under the chevron. White marks have no outline.
+with short horizontal terminals, and a white dot tangent to the bar under >.
+White marks have no outline.
 """
 
 from __future__ import annotations
@@ -88,11 +89,19 @@ def _dot(s, c: tuple[float, float], diameter: float) -> None:
     s.ellipse((c[0] - r, c[1] - r, c[0] + r, c[1] + r), fill=WHITE)
 
 
-def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], factor: int) -> None:
-    """White I + two 45° strokes forming >, plus a dot under the >.
+def _polyline(s, pts: list[tuple[float, float]], width: float) -> None:
+    for a, b in zip(pts, pts[1:]):
+        s.polygon(_thick_line(a, b, width), fill=WHITE)
+    for p in pts:
+        _dot(s, p, width)
 
-    No extra horizontal bars. The > group (chevron + dot) matches the I:
-    top of > = top of I, bottom of the dot = bottom of I.
+
+def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], factor: int) -> None:
+    """White I + > with short horizontal terminals + a tangent dot.
+
+    The bar under > is a flat terminal whose underside is tangent to the
+    circle. The right group then matches the I: top of > = top of I,
+    bottom of the circle = bottom of I.
     """
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
@@ -103,30 +112,31 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     pad_y = h * 0.09
     top = y0 + pad_y
     bot = y1 - pad_y
+    # Chord overlap so the bar clearly sits on the circle after downsample.
+    overlap = 5.0
 
-    # Tight gap so the dot sits just under the lower arm, as in the schematic.
-    gap_dot = stroke * 0.08
-    gt_bot = bot - stroke - gap_dot
-    gt_h = gt_bot - top
-    # 45° arms: run equals rise from the left terminals to the tip.
-    run = gt_h / 2
+    y_upper = top + half
+    # Lower bar underside sits on the circle (plus overlap).
+    bar_bot = bot - stroke + overlap
+    y_lower = bar_bot - half
+    stub = stroke * 1.2
+    run = (y_lower - y_upper) / 2
     gap_i = stroke * 0.55
 
-    content_w = stroke + gap_i + run + half
+    content_w = stroke + gap_i + stub + run + half
     left = x0 + (w - content_w) / 2
     i_left = left
     s.rectangle((i_left, top, i_left + stroke, bot), fill=WHITE)
 
-    cx = i_left + stroke + gap_i + half
-    start_u = (cx, top + half)
-    start_l = (cx, gt_bot - half)
-    tip = (cx + run, (top + gt_bot) / 2)
+    x_bar = i_left + stroke + gap_i
+    cx = x_bar + half
+    p1 = (x_bar + stub, y_upper)
+    p2 = (x_bar + stub + run, (y_upper + y_lower) / 2)
+    p3 = (x_bar + stub, y_lower)
 
-    s.polygon(_thick_line(start_u, tip, stroke), fill=WHITE)
-    s.polygon(_thick_line(start_l, tip, stroke), fill=WHITE)
-    _dot(s, start_u, stroke)
-    _dot(s, start_l, stroke)
-    _dot(s, tip, stroke)
+    s.rectangle((x_bar, top, x_bar + stub + half, top + stroke), fill=WHITE)
+    s.rectangle((x_bar, bar_bot - stroke, x_bar + stub + half, bar_bot), fill=WHITE)
+    _polyline(s, [p1, p2, p3], stroke)
     _dot(s, (cx, bot - half), stroke)
 
 
@@ -222,22 +232,24 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_preview_512.png")
-    save(launcher(192), dest / "icon_preview_192.png")
-    save(banner(640, 360), dest / "tv_banner_preview.png")
+    save(icon, dest / "icon_preview_show_512.png")
+    save(launcher(192), dest / "icon_preview_show_192.png")
+    save(banner(640, 360), dest / "tv_banner_preview_show.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_preview_{name}.png")
+        save(plate, dest / f"icon_preview_show_{name}.png")
 
-    sketch = Path("/home/ubuntu/.cursor/projects/workspace/assets/15afe956-7ef0-41d5-8a34-d16e1cc04dae.png")
+    sketch = Path(
+        "/home/ubuntu/.cursor/projects/workspace/assets/31a4162b-7872-482b-ad66-f667f7ea4fa8.png"
+    )
     if sketch.exists():
         ref = Image.open(sketch).convert("RGBA")
         ref.thumbnail((512, 512), Image.Resampling.LANCZOS)
         compare = Image.new("RGBA", (512 + 40 + ref.width, 560), (245, 245, 245, 255))
         compare.alpha_composite(icon, (0, 24))
         compare.alpha_composite(ref, (512 + 40, 24 + (512 - ref.height) // 2))
-        save(compare, dest / "icon_preview_vs_sketch.png")
+        save(compare, dest / "icon_preview_show_vs_sketch.png")
 
 
 if __name__ == "__main__":
