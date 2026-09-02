@@ -66,16 +66,14 @@ Android 5.0 及以上即可，覆盖目前几乎所有手机。
 npm run dist:win
 ```
 
-生成：
+生成（约 150MB，请从 **Release** 下载，不要把 GitHub 网页另存为 exe）：
 
-- `release/IPTV-Client-1.0.20-portable.exe`（Windows x64 便携版，拷到电脑直接打开）
+- [IPTV-Client-1.0.20-portable.exe](https://github.com/Abner-hu/iptv-client/releases/latest/download/IPTV-Client-1.0.20-portable.exe)（Windows 10+ x64 / ARM64，双击即可）
+- [IPTV-Client-1.0.20-win-x64.zip](https://github.com/Abner-hu/iptv-client/releases/latest/download/IPTV-Client-1.0.20-win-x64.zip)（解压后运行 `IPTV Client.exe`）
 
-GitHub 直接下载：
+完整 exe 大约 **150MB**。如果只有一两百 KB，那是浏览器把网页存成了 exe，请用上面的 Release 直链重新下。
 
-- Release：[IPTV-Client-1.0.20-portable.exe](https://github.com/Abner-hu/iptv-client/releases/latest/download/IPTV-Client-1.0.20-portable.exe)
-- 仓库文件：[release/IPTV-Client-1.0.20-portable.exe](https://github.com/Abner-hu/iptv-client/blob/main/release/IPTV-Client-1.0.20-portable.exe)
-
-在 Windows 上双击 exe。第一次会解压到临时目录并启动内置播放服务，窗口标题为 **IPTV Client**。
+在 Windows 上双击 exe。第一次会解压到 `%LOCALAPPDATA%\IPTV Client\1.0.20\`，之后直接启动。
 
 开发时仍可分开跑网页和窗口：
 
@@ -86,7 +84,7 @@ npm run desktop
 
 也可以双击 `scripts/start-iptv.bat`（需已 `npm install`，且本机已 `npm run start` 或 `npm run dev`）。
 
-在 Linux / macOS 上交叉打包 Windows exe 时，便携版目标通常需要 [Wine](https://www.winehq.org/)。没有 Wine 时脚本会退回打 `release/IPTV-Client-*.zip`，拷到 Windows 解压后运行 `IPTV Client.exe`。
+交叉打包需要 `x86_64-w64-mingw32-gcc`（打 64 位外壳）和 `7z`。
 
 ## 说明
 

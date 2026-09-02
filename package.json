@@ -72,15 +72,12 @@
       "artifactName": "IPTV-Client-${version}-win-x64.${ext}",
       "target": [
         {
-          "target": "portable",
+          "target": "dir",
           "arch": [
             "x64"
           ]
         }
       ]
-    },
-    "portable": {
-      "artifactName": "IPTV-Client-${version}-portable.exe"
     }
   }
 }

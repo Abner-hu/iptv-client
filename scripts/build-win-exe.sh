@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build a standalone Windows portable EXE (Next.js server + Electron shell).
+# Build a standalone Windows x64 portable EXE (Next.js server + Electron shell).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -37,39 +37,59 @@ fi
 rm -rf "$STANDALONE/public"
 mkdir -p "$STANDALONE/public" "$STANDALONE/.next/static"
 if command -v rsync >/dev/null; then
-  rsync -a --exclude 'iptv-client.v*.apk' public/ "$STANDALONE/public/"
+  rsync -a --exclude 'iptv-client.v*.apk' --exclude 'IPTV-Client-*.exe' public/ "$STANDALONE/public/"
 else
   cp -a public/. "$STANDALONE/public/"
-  rm -f "$STANDALONE/public"/iptv-client.v*.apk
+  rm -f "$STANDALONE/public"/iptv-client.v*.apk "$STANDALONE/public"/IPTV-Client-*.exe
 fi
 cp -a .next/static/. "$STANDALONE/.next/static/"
 
 export CSC_IDENTITY_AUTO_DISCOVERY=false
-# Avoid hanging on optional Windows code signing.
 export WIN_CSC_LINK=""
-# Ubuntu's wine64 package puts the binary in /usr/lib/wine, not PATH.
-if [[ -x /usr/lib/wine/wine64 && -z "${WINE:-}" ]]; then
-  export PATH="/usr/lib/wine:$PATH"
-  export WINE="${WINE:-/usr/lib/wine/wine64}"
+
+echo "Packing Windows x64 app directory…"
+npx electron-builder --win dir --x64
+if [[ ! -f "release/win-unpacked/IPTV Client.exe" ]]; then
+  echo "electron-builder did not produce release/win-unpacked/IPTV Client.exe" >&2
+  exit 1
+fi
+if [[ ! -d release/win-unpacked/resources/standalone/node_modules/next ]]; then
+  echo "standalone node_modules/next missing from the Windows package" >&2
+  exit 1
 fi
 
-echo "Packing Windows portable EXE…"
-if npx electron-builder --win portable --x64; then
-  if [[ ! -d release/win-unpacked/resources/standalone/node_modules/next ]]; then
-    echo "standalone node_modules/next missing from the Windows package" >&2
-    exit 1
-  fi
-  VERSION="$(node -p "require('./package.json').version")"
-  NAME="IPTV-Client-${VERSION}-portable.exe"
-  if [[ -f "release/$NAME" ]]; then
-    echo "EXE: $ROOT/release/$NAME"
-    echo "GitHub Release: https://github.com/Abner-hu/iptv-client/releases/latest/download/$NAME"
-  fi
-  ls -lh release/*.exe 2>/dev/null || true
-  exit 0
-fi
+VERSION="$(node -p "require('./package.json').version")"
+EXE_NAME="IPTV-Client-${VERSION}-portable.exe"
+ZIP_NAME="IPTV-Client-${VERSION}-win-x64.zip"
+LAUNCHER="/tmp/iptv-win-launcher.exe"
+PAYLOAD="/tmp/iptv-win-payload.zip"
 
-echo "portable target failed (often needs Wine on Linux). Falling back to zip…"
-npx electron-builder --win zip --x64
-echo "Windows zip is in release/. Unpack on Windows and run IPTV Client.exe"
-ls -lh release/*.zip 2>/dev/null || true
+if ! command -v x86_64-w64-mingw32-gcc >/dev/null; then
+  echo "x86_64-w64-mingw32-gcc is required to stamp a 64-bit EXE stub" >&2
+  exit 1
+fi
+x86_64-w64-mingw32-gcc -O2 -s -municode -mwindows electron/win-launcher.c -o "$LAUNCHER" -lshell32 -lole32
+
+echo "Compressing unpacked app…"
+rm -f "$PAYLOAD" "release/$ZIP_NAME" "release/$EXE_NAME"
+(
+  cd release/win-unpacked
+  7z a -tzip -mx=7 "$PAYLOAD" . -x!elevate.exe
+)
+cp -f "$PAYLOAD" "release/$ZIP_NAME"
+
+python3 - <<PY
+from pathlib import Path
+import struct
+launcher = Path("$LAUNCHER").read_bytes()
+payload = Path("$PAYLOAD").read_bytes()
+out = launcher + payload + struct.pack("<Q", len(payload)) + b"IPTVZIP1"
+dest = Path("release/$EXE_NAME")
+dest.write_bytes(out)
+print(f"wrote {dest} ({dest.stat().st_size} bytes)")
+PY
+
+echo "EXE: $ROOT/release/$EXE_NAME"
+echo "ZIP: $ROOT/release/$ZIP_NAME"
+echo "GitHub Release: https://github.com/Abner-hu/iptv-client/releases/latest/download/$EXE_NAME"
+ls -lh "release/$EXE_NAME" "release/$ZIP_NAME"
