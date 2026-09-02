@@ -47,9 +47,18 @@ cp -a .next/static/. "$STANDALONE/.next/static/"
 export CSC_IDENTITY_AUTO_DISCOVERY=false
 # Avoid hanging on optional Windows code signing.
 export WIN_CSC_LINK=""
+# Ubuntu's wine64 package puts the binary in /usr/lib/wine, not PATH.
+if [[ -x /usr/lib/wine/wine64 && -z "${WINE:-}" ]]; then
+  export PATH="/usr/lib/wine:$PATH"
+  export WINE="${WINE:-/usr/lib/wine/wine64}"
+fi
 
 echo "Packing Windows portable EXE…"
 if npx electron-builder --win portable --x64; then
+  if [[ ! -d release/win-unpacked/resources/standalone/node_modules/next ]]; then
+    echo "standalone node_modules/next missing from the Windows package" >&2
+    exit 1
+  fi
   echo "Windows portable EXE is in release/"
   ls -lh release/*.exe 2>/dev/null || true
   exit 0

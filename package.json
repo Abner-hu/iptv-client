@@ -57,16 +57,18 @@
         "to": "standalone",
         "filter": [
           "**/*",
+          "**/node_modules/**",
           "!**/*.map"
         ]
       }
     ],
+    "afterPack": "electron/after-pack.cjs",
     "directories": {
       "output": "release"
     },
     "win": {
       "icon": "electron/icon.ico",
-      "signAndEditResources": false,
+      "signExecutable": false,
       "artifactName": "IPTV-Client-${version}-win-x64.${ext}",
       "target": [
         {
