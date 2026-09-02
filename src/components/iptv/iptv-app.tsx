@@ -151,7 +151,7 @@ export function IptvApp() {
     setViewMode("all")
     setSourceFilter("all")
     setClearOpen(false)
-    toast.success("已清除全部 M3U")
+    toast.success("已清除全部 M3U8")
   }
 
   const empty = state.channels.length === 0
@@ -239,11 +239,11 @@ export function IptvApp() {
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setImportOpen(true)}>
               <FolderPlus />
-              导入 M3U
+              导入 M3U8
             </DropdownMenuItem>
             <DropdownMenuItem variant="destructive" onSelect={() => setClearOpen(true)}>
               <Trash2 />
-              清除 M3U
+              清除 M3U8
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -334,7 +334,7 @@ export function IptvApp() {
       <Dialog open={clearOpen} onOpenChange={setClearOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>清除 M3U</DialogTitle>
+            <DialogTitle>清除 M3U8</DialogTitle>
             <DialogDescription>
               将删除全部已导入的播放列表和频道，此操作无法恢复。
             </DialogDescription>

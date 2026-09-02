@@ -357,7 +357,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun confirmClear() {
         AlertDialog.Builder(this, R.style.TvDialog)
-            .setTitle("清除 M3U")
+            .setTitle("清除 M3U8")
             .setMessage("将删除全部已导入的播放列表和频道，此操作无法恢复。")
             .setPositiveButton("清除") { _, _ ->
                 player?.stop()
@@ -367,7 +367,7 @@ class MainActivity : AppCompatActivity() {
                 nowPlaying.text = "IPTV Client"
                 status.text = "选择频道开始播放"
                 render()
-                Toast.makeText(this, "已清除全部 M3U", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "已清除全部 M3U8", Toast.LENGTH_SHORT).show()
                 findViewById<Button>(R.id.importKnown).requestFocus()
             }
             .setNegativeButton("取消", null)
@@ -385,7 +385,7 @@ class MainActivity : AppCompatActivity() {
         list.itemAnimator = null
         list.adapter = ImportSourceAdapter(KnownPlaylists.all, checked)
         val dialog = AlertDialog.Builder(this, R.style.TvDialog)
-            .setTitle("导入 M3U")
+            .setTitle("导入 M3U8")
             .setView(body)
             .setPositiveButton("导入") { _, _ ->
                 val selected = KnownPlaylists.all.filterIndexed { index, _ -> checked[index] }

@@ -28,7 +28,7 @@
         android:focusable="true"
         android:nextFocusUp="@id/settingsRecent"
         android:nextFocusDown="@id/settingsClear"
-        android:text="导入 M3U"
+        android:text="导入 M3U8"
         android:textColor="#F5F5F4"
         android:textSize="18sp" />
 
@@ -40,7 +40,7 @@
         android:backgroundTint="#7F1D1D"
         android:focusable="true"
         android:nextFocusUp="@id/settingsImport"
-        android:text="清除 M3U"
+        android:text="清除 M3U8"
         android:textColor="#FECACA"
         android:textSize="18sp" />
 </LinearLayout>
