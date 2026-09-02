@@ -89,9 +89,10 @@ def _dot(s, c: tuple[float, float], diameter: float) -> None:
 
 
 def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], factor: int) -> None:
-    """White I + short-bar > with curved joins.
+    """White I + short-bar > with curved joins. No dot under >.
 
-    Gap between I and > is one stroke. > top/bottom match the I. No dot.
+    Spacing is the pre-widening gap. > keeps the height it had with the
+    circle; it is not stretched to match the I.
     """
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
@@ -102,12 +103,15 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     pad_y = h * 0.09
     top = y0 + pad_y
     bot = y1 - pad_y
+    # Same > geometry as when the tangent circle occupied the bottom.
+    overlap = 4.0
 
     y_upper = top + half
-    y_lower = bot - half
+    bar_bot = bot - stroke + overlap
+    y_lower = bar_bot - half
     stub = stroke * 0.7
     run = (y_lower - y_upper) / 2
-    gap_i = stroke
+    gap_i = stroke * 0.55
 
     content_w = stroke + gap_i + stub + run + half
     left = x0 + (w - content_w) / 2
@@ -217,13 +221,13 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_preview_nodot_512.png")
-    save(launcher(192), dest / "icon_preview_nodot_192.png")
-    save(banner(640, 360), dest / "tv_banner_preview_nodot.png")
+    save(icon, dest / "icon_preview_keepgt_512.png")
+    save(launcher(192), dest / "icon_preview_keepgt_192.png")
+    save(banner(640, 360), dest / "tv_banner_preview_keepgt.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_preview_nodot_{name}.png")
+        save(plate, dest / f"icon_preview_keepgt_{name}.png")
 
     prev = dest / "icon_preview_fillet_on_white.png"
     if prev.exists():
@@ -233,7 +237,7 @@ def write_preview(dest: Path) -> None:
         plate.alpha_composite(icon, (24, 24))
         compare.alpha_composite(plate, (0, 0))
         compare.alpha_composite(ref, (560 + 40, 0))
-        save(compare, dest / "icon_preview_nodot_vs_prev.png")
+        save(compare, dest / "icon_preview_keepgt_vs_prev.png")
 
 
 if __name__ == "__main__":
