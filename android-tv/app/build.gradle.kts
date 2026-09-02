@@ -11,8 +11,8 @@ android {
         applicationId = "com.iptv.tvbox"
         minSdk = 21
         targetSdk = 34
-        versionCode = 20
-        versionName = "1.0.19"
+        versionCode = 21
+        versionName = "1.0.20"
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }

@@ -121,7 +121,7 @@ export function ImportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>导入 M3U8</DialogTitle>
+          <DialogTitle>导入 M3U</DialogTitle>
           <DialogDescription>
             内置源来自 iptv-org 公开播放列表，也可粘贴自定义地址或打开本地 .m3u 文件。
           </DialogDescription>
