@@ -139,7 +139,7 @@ def launcher(size: int) -> Image.Image:
     pad = size * 0.02
     radius = size * 0.22
     # 24px black ring on the 192 launcher; other densities scale with size.
-    border = size * (24 / 192)
+    border = size * (30 / 192)
     s.rounded_rectangle((pad, pad, size - pad, size - pad), radius=radius, fill=BLACK)
     inner = pad + border
     inner_radius = max(4.0, radius - border * 0.92)
@@ -262,13 +262,13 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_border24_512.png")
-    save(launcher(192), dest / "launcher_192_border24.png")
-    save(banner(640, 360), dest / "tv_banner_border24.png")
+    save(icon, dest / "icon_border30_512.png")
+    save(launcher(192), dest / "launcher_192_border30.png")
+    save(banner(640, 360), dest / "tv_banner_border30.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_border24_{name}.png")
+        save(plate, dest / f"icon_border30_{name}.png")
 
 
 if __name__ == "__main__":
