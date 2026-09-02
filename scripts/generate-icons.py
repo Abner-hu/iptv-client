@@ -188,8 +188,9 @@ def banner(width: int, height: int) -> Image.Image:
     live_h = live_box[3] - live_box[1]
     gap = height * 0.055 * factor
     block = title_h + gap + live_h
-    # Sit a bit above geometric center so the title lines up with the icon.
-    ty = (height * factor - block) / 2 - height * 0.07 * factor
+    # Center the title + LIVE block with the icon; a hair below canvas
+    # center matches the lockup (LIVE hangs under IPTV).
+    ty = (height * factor - block) / 2 + height * 0.024 * factor
     draw.text((tx - title_box[0], ty - title_box[1]), title, font=title_font, fill=WHITE)
     draw.text(
         (tx - live_box[0], ty + title_h + gap - live_box[1]),
@@ -229,13 +230,13 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_centered_512.png")
-    save(launcher(192), dest / "icon_centered_192.png")
-    save(banner(640, 360), dest / "tv_banner_centered.png")
+    save(icon, dest / "icon_v14_512.png")
+    save(launcher(192), dest / "icon_v14_192.png")
+    save(banner(640, 360), dest / "tv_banner_v14.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_centered_{name}.png")
+        save(plate, dest / f"icon_v14_{name}.png")
 
 
 if __name__ == "__main__":
