@@ -59,7 +59,12 @@ if npx electron-builder --win portable --x64; then
     echo "standalone node_modules/next missing from the Windows package" >&2
     exit 1
   fi
-  echo "Windows portable EXE is in release/"
+  VERSION="$(node -p "require('./package.json').version")"
+  NAME="IPTV-Client-${VERSION}-portable.exe"
+  if [[ -f "release/$NAME" ]]; then
+    echo "EXE: $ROOT/release/$NAME"
+    echo "GitHub Release: https://github.com/Abner-hu/iptv-client/releases/latest/download/$NAME"
+  fi
   ls -lh release/*.exe 2>/dev/null || true
   exit 0
 fi

@@ -70,6 +70,11 @@ npm run dist:win
 
 - `release/IPTV-Client-1.0.20-portable.exe`（Windows x64 便携版，拷到电脑直接打开）
 
+GitHub 直接下载：
+
+- Release：[IPTV-Client-1.0.20-portable.exe](https://github.com/Abner-hu/iptv-client/releases/latest/download/IPTV-Client-1.0.20-portable.exe)
+- 仓库文件：[release/IPTV-Client-1.0.20-portable.exe](https://github.com/Abner-hu/iptv-client/blob/main/release/IPTV-Client-1.0.20-portable.exe)
+
 在 Windows 上双击 exe。第一次会解压到临时目录并启动内置播放服务，窗口标题为 **IPTV Client**。
 
 开发时仍可分开跑网页和窗口：

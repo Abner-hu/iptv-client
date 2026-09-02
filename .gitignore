@@ -23,6 +23,7 @@
 !public/iptv-client.v*.apk
 !release/iptv-client.v*.apk
 /release/*.exe
+!release/IPTV-Client-*-portable.exe
 /release/*.zip
 /release/win-unpacked/
 /release/*.blockmap

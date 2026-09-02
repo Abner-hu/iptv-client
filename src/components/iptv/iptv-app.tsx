@@ -31,7 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { APK_FILENAME } from "@/lib/apk"
+import { APK_FILENAME, EXE_DOWNLOAD_URL, EXE_FILENAME } from "@/lib/apk"
 import { downloadPlaylist } from "@/lib/iptv-fetch"
 import { DEFAULT_IMPORT_IDS, KNOWN_PLAYLISTS } from "@/lib/known-playlists"
 import { groupChannels, parseM3u } from "@/lib/m3u"
@@ -225,6 +225,11 @@ export function IptvApp() {
             下载 APK
           </a>
         </Button>
+        <Button size="sm" variant="outline" asChild>
+          <a href={EXE_DOWNLOAD_URL} download={EXE_FILENAME}>
+            下载 EXE
+          </a>
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="sm">
@@ -298,9 +303,14 @@ export function IptvApp() {
                     下载 APK（电视 / 手机）
                   </a>
                 </Button>
+                <Button variant="outline" asChild>
+                  <a href={EXE_DOWNLOAD_URL} download={EXE_FILENAME}>
+                    下载 EXE（Windows）
+                  </a>
+                </Button>
               </div>
               <p className="mt-4 max-w-md text-xs text-muted-foreground">
-                同一 APK 可装安卓电视和安卓手机。电视用 U 盘或当贝市场；手机打开文件并允许未知来源即可。
+                同一 APK 可装安卓电视和安卓手机。电视用 U 盘或当贝市场；手机打开文件并允许未知来源即可。Windows 用绿色版 EXE，双击打开。
               </p>
             </div>
           ) : (
