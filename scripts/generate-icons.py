@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Generate IPTV Client launcher / banner / favicon art.
 
-Red rounded square, thick black frame, white I stem, uniform-width white >
-with short horizontal terminals, and a white dot tangent to the bar under >.
-White marks have no outline.
+Red rounded square, thick black frame, white I stem, and a uniform-width
+white > with short horizontal terminals. White marks have no outline.
 """
 
 from __future__ import annotations
@@ -90,10 +89,9 @@ def _dot(s, c: tuple[float, float], diameter: float) -> None:
 
 
 def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], factor: int) -> None:
-    """White I + short-bar > with curved joins + a tangent dot.
+    """White I + short-bar > with curved joins.
 
-    Horizontals are only long enough to read as a bar before the 45° curve.
-    The lower bar is tangent to the circle. Right group height matches the I.
+    Gap between I and > is one stroke. > top/bottom match the I. No dot.
     """
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
@@ -104,15 +102,12 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     pad_y = h * 0.09
     top = y0 + pad_y
     bot = y1 - pad_y
-    overlap = 4.0
 
     y_upper = top + half
-    bar_bot = bot - stroke + overlap
-    y_lower = bar_bot - half
-    # Shortest stub that still shows a flat before the curve join.
+    y_lower = bot - half
     stub = stroke * 0.7
     run = (y_lower - y_upper) / 2
-    gap_i = stroke * 0.55
+    gap_i = stroke
 
     content_w = stroke + gap_i + stub + run + half
     left = x0 + (w - content_w) / 2
@@ -128,7 +123,6 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     pts = [(int(round(p[0] * factor)), int(round(p[1] * factor))) for p in (p0, p1, p2, p3, p4)]
     width_px = max(5, int(round(stroke * factor)))
     draw.line(pts, fill=WHITE, width=width_px, joint="curve")
-    _dot(s, (x_edge + half, bot - half), stroke)
 
 
 def launcher(size: int) -> Image.Image:
@@ -223,24 +217,23 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_preview_fillet_512.png")
-    save(launcher(192), dest / "icon_preview_fillet_192.png")
-    save(banner(640, 360), dest / "tv_banner_preview_fillet.png")
+    save(icon, dest / "icon_preview_nodot_512.png")
+    save(launcher(192), dest / "icon_preview_nodot_192.png")
+    save(banner(640, 360), dest / "tv_banner_preview_nodot.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_preview_fillet_{name}.png")
+        save(plate, dest / f"icon_preview_nodot_{name}.png")
 
-    sketch = Path(
-        "/home/ubuntu/.cursor/projects/workspace/assets/70347949-795e-41a4-a385-2ec8afcd7c30.png"
-    )
-    if sketch.exists():
-        ref = Image.open(sketch).convert("RGBA")
-        ref.thumbnail((512, 512), Image.Resampling.LANCZOS)
-        compare = Image.new("RGBA", (512 + 40 + ref.width, 560), (245, 245, 245, 255))
-        compare.alpha_composite(icon, (0, 24))
-        compare.alpha_composite(ref, (512 + 40, 24 + (512 - ref.height) // 2))
-        save(compare, dest / "icon_preview_fillet_vs_sketch.png")
+    prev = dest / "icon_preview_fillet_on_white.png"
+    if prev.exists():
+        ref = Image.open(prev).convert("RGBA")
+        compare = Image.new("RGBA", (560 + 40 + ref.width, 560), (245, 245, 245, 255))
+        plate = Image.new("RGBA", (560, 560), (245, 245, 245, 255))
+        plate.alpha_composite(icon, (24, 24))
+        compare.alpha_composite(plate, (0, 0))
+        compare.alpha_composite(ref, (560 + 40, 0))
+        save(compare, dest / "icon_preview_nodot_vs_prev.png")
 
 
 if __name__ == "__main__":
