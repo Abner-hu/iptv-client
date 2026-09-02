@@ -307,16 +307,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showImportDialog() {
-        val names = KnownPlaylists.all.map { "${it.name}  ·  ${it.region}" }.toTypedArray()
-        val checked = BooleanArray(names.size)
+        val checked = BooleanArray(KnownPlaylists.all.size)
         KnownPlaylists.all.forEachIndexed { index, item ->
             checked[index] = store.playlists.any { it.id == item.id } || item.id in KnownPlaylists.defaultIds
         }
-        AlertDialog.Builder(this, R.style.TvDialog)
-            .setTitle("导入已知 M3U")
-            .setMultiChoiceItems(names, checked) { _, which, isChecked ->
-                checked[which] = isChecked
-            }
+        val body = layoutInflater.inflate(R.layout.dialog_import, null)
+        val list = body.findViewById<RecyclerView>(R.id.importList)
+        list.layoutManager = LinearLayoutManager(this)
+        list.itemAnimator = null
+        list.adapter = ImportSourceAdapter(KnownPlaylists.all, checked)
+        val dialog = AlertDialog.Builder(this, R.style.TvDialog)
+            .setTitle("导入 M3U")
+            .setView(body)
             .setPositiveButton("导入") { _, _ ->
                 val selected = KnownPlaylists.all.filterIndexed { index, _ -> checked[index] }
                 if (selected.isEmpty()) {
@@ -345,7 +347,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton("取消", null)
-            .show()
+            .create()
+        dialog.show()
+        val width = (resources.displayMetrics.widthPixels * 0.72f).toInt().coerceAtLeast(480)
+        dialog.window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+        list.post {
+            list.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+        }
     }
 
     private fun busy(on: Boolean) {

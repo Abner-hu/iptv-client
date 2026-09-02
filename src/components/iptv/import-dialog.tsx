@@ -136,10 +136,16 @@ export function ImportDialog({
                   const checked = selected.includes(item.id)
                   return (
                     <li key={item.id}>
-                      <label className="flex cursor-pointer items-start gap-2 rounded-md px-2 py-1.5 hover:bg-muted/60">
+                      <label
+                        className={
+                          checked
+                            ? "flex cursor-pointer items-start gap-2 rounded-md bg-amber-500 px-2 py-2 text-zinc-950"
+                            : "flex cursor-pointer items-start gap-2 rounded-md px-2 py-2 hover:bg-muted/60"
+                        }
+                      >
                         <input
                           type="checkbox"
-                          className="mt-1"
+                          className="mt-1 size-4 accent-zinc-950"
                           checked={checked}
                           onChange={() => {
                             setSelected((prev) =>
@@ -149,14 +155,33 @@ export function ImportDialog({
                             )
                           }}
                         />
-                        <span>
-                          <span className="block text-sm font-medium">
-                            {item.name}
-                            <span className="ml-2 text-xs font-normal text-muted-foreground">
-                              {item.region}
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2">
+                            <span className="block text-sm font-medium">
+                              {item.name}
+                              <span
+                                className={
+                                  checked
+                                    ? "ml-2 text-xs font-normal text-zinc-800"
+                                    : "ml-2 text-xs font-normal text-muted-foreground"
+                                }
+                              >
+                                {item.region}
+                              </span>
                             </span>
+                            {checked ? (
+                              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-zinc-950">
+                                已选
+                              </span>
+                            ) : null}
                           </span>
-                          <span className="block text-xs text-muted-foreground">
+                          <span
+                            className={
+                              checked
+                                ? "block text-xs text-zinc-800"
+                                : "block text-xs text-muted-foreground"
+                            }
+                          >
                             {item.description}
                           </span>
                         </span>
