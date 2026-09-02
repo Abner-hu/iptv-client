@@ -174,8 +174,8 @@ def banner(width: int, height: int) -> Image.Image:
     live_font = ImageFont.truetype(LIVE_FONT, live_size)
     sx = width / 640
     sy = height / 360
-    _blit_text(canvas, "IPTV Client", title_font, WHITE, (240 * sx, 140 * sy))
-    _blit_text(canvas, "LIVE", live_font, AMBER, (240 * sx, 205 * sy))
+    _blit_text(canvas, "IPTV Client", title_font, WHITE, (240 * sx, 130 * sy))
+    _blit_text(canvas, "LIVE", live_font, AMBER, (240 * sx, 195 * sy))
     return canvas
 
 
@@ -261,13 +261,13 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_v15b_512.png")
-    save(launcher(192), dest / "icon_v15b_192.png")
-    save(banner(640, 360), dest / "tv_banner_lockup_240.png")
+    save(icon, dest / "icon_v16_512.png")
+    save(launcher(192), dest / "icon_v16_192.png")
+    save(banner(640, 360), dest / "tv_banner_up10.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_v15b_{name}.png")
+        save(plate, dest / f"icon_v16_{name}.png")
 
 
 if __name__ == "__main__":
