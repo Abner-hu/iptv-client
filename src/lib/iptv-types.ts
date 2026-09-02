@@ -21,6 +21,7 @@ export type IptvState = {
   playlists: PlaylistRecord[]
   channels: Channel[]
   favorites: string[]
+  recentChannelIds: string[]
   lastChannelId?: string
   lastSourceId?: string
 }

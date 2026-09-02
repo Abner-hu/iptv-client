@@ -50,13 +50,13 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/importMoreHeader"
+            android:id="@+id/settingsButton"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:backgroundTint="#D97706"
             android:focusable="true"
             android:nextFocusRight="@id/copyrightButton"
-            android:text="导入"
+            android:text="设置"
             android:textColor="#1C1917" />
 
         <Button
@@ -66,7 +66,7 @@
             android:layout_marginStart="8dp"
             android:backgroundTint="#292524"
             android:focusable="true"
-            android:nextFocusLeft="@id/importMoreHeader"
+            android:nextFocusLeft="@id/settingsButton"
             android:text="版权"
             android:textColor="#F5F5F4" />
     </LinearLayout>
@@ -221,8 +221,9 @@
                     android:layout_margin="12dp"
                     android:backgroundTint="#292524"
                     android:focusable="true"
-                    android:text="导入更多公开源"
-                    android:textColor="#F5F5F4" />
+                    android:text="显示全部频道"
+                    android:textColor="#F5F5F4"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 

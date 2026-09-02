@@ -13,17 +13,19 @@ export function ChannelSidebar({
   favorites,
   onSelect,
   onToggleFavorite,
+  emptyLabel = "还没有频道。请先导入 M3U 播放列表。",
 }: {
   groups: { group: string; items: Channel[] }[]
   activeId?: string
   favorites: string[]
   onSelect: (channel: Channel) => void
   onToggleFavorite: (id: string) => void
+  emptyLabel?: string
 }) {
   if (groups.length === 0) {
     return (
       <div className="flex h-full items-center justify-center px-6 text-center text-sm text-muted-foreground">
-        还没有频道。请先导入 M3U 播放列表。
+        {emptyLabel}
       </div>
     )
   }

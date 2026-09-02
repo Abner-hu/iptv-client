@@ -1,10 +1,12 @@
 import type { Channel, IptvState, PlaylistRecord } from "@/lib/iptv-types"
 
 const KEY = "iptv-terminal:v1"
+const RECENT_LIMIT = 40
 const EMPTY: IptvState = {
   playlists: [],
   channels: [],
   favorites: [],
+  recentChannelIds: [],
 }
 
 let cache: IptvState = EMPTY
@@ -34,10 +36,17 @@ export function getIptvSnapshot(): IptvState {
   }
   try {
     const parsed = JSON.parse(raw) as Partial<IptvState>
+    const recentChannelIds = parsed.recentChannelIds ?? []
     cache = {
       playlists: parsed.playlists ?? [],
       channels: parsed.channels ?? [],
       favorites: parsed.favorites ?? [],
+      recentChannelIds:
+        recentChannelIds.length > 0
+          ? recentChannelIds
+          : parsed.lastChannelId
+            ? [parsed.lastChannelId]
+            : [],
       lastChannelId: parsed.lastChannelId,
       lastSourceId: parsed.lastSourceId,
     }
@@ -92,10 +101,13 @@ export function upsertPlaylist(
 
 export function removePlaylist(id: string) {
   const current = getIptvSnapshot()
+  const channels = current.channels.filter((channel) => channel.sourceId !== id)
+  const keep = new Set(channels.map((channel) => channel.id))
   saveIptvState({
     ...current,
     playlists: current.playlists.filter((item) => item.id !== id),
-    channels: current.channels.filter((channel) => channel.sourceId !== id),
+    channels,
+    recentChannelIds: current.recentChannelIds.filter((channelId) => keep.has(channelId)),
     lastSourceId: current.lastSourceId === id ? undefined : current.lastSourceId,
   })
 }
@@ -110,7 +122,11 @@ export function toggleFavorite(channelId: string) {
 
 export function setLastChannel(channelId: string) {
   const current = getIptvSnapshot()
-  saveIptvState({ ...current, lastChannelId: channelId })
+  const recentChannelIds = [
+    channelId,
+    ...current.recentChannelIds.filter((id) => id !== channelId),
+  ].slice(0, RECENT_LIMIT)
+  saveIptvState({ ...current, lastChannelId: channelId, recentChannelIds })
 }
 
 export function clearAll() {

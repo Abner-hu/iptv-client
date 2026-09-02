@@ -56,7 +56,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var volumeBar: SeekBar
     private lateinit var playerMeta: View
     private lateinit var playerControls: View
+    private lateinit var showAllButton: Button
     private var fullscreen = false
+    private var recentOnly = false
     private val hideChrome = Runnable {
         if (fullscreen) setChromeVisible(false)
     }
@@ -120,10 +122,14 @@ class MainActivity : AppCompatActivity() {
 
         setupPlayer()
         findViewById<Button>(R.id.importKnown).setOnClickListener { importDefaults() }
-        findViewById<Button>(R.id.importMore).setOnClickListener { showImportDialog() }
-        findViewById<Button>(R.id.importMoreHeader).setOnClickListener { showImportDialog() }
         findViewById<Button>(R.id.importEmptyMore).setOnClickListener { showImportDialog() }
+        findViewById<Button>(R.id.settingsButton).setOnClickListener { showSettings() }
         findViewById<Button>(R.id.copyrightButton).setOnClickListener { showCopyright() }
+        showAllButton = findViewById(R.id.importMore)
+        showAllButton.setOnClickListener {
+            recentOnly = false
+            render()
+        }
         search.doAfterTextChanged { renderList() }
 
         render()
@@ -238,12 +244,18 @@ class MainActivity : AppCompatActivity() {
         val empty = store.channels.isEmpty()
         emptyState.visibility = if (empty) View.VISIBLE else View.GONE
         content.visibility = if (empty) View.GONE else View.VISIBLE
-        countBadge.text = "${store.channels.size} 频道"
+        if (empty) recentOnly = false
+        countBadge.text = if (recentOnly) {
+            "最近播放 · ${store.recentChannels().size}"
+        } else {
+            "${store.channels.size} 频道"
+        }
+        showAllButton.visibility = if (!empty && recentOnly) View.VISIBLE else View.GONE
         renderList()
     }
 
     private fun renderList() {
-        adapter.submit(store.grouped(search.text?.toString().orEmpty()))
+        adapter.submit(store.grouped(search.text?.toString().orEmpty(), recentOnly))
         adapter.selectedId = store.lastChannelId
     }
 
@@ -306,6 +318,62 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun showSettings() {
+        val body = layoutInflater.inflate(R.layout.dialog_settings, null)
+        val dialog = AlertDialog.Builder(this, R.style.TvDialog)
+            .setTitle("设置")
+            .setView(body)
+            .setNegativeButton("关闭", null)
+            .create()
+        body.findViewById<Button>(R.id.settingsRecent).setOnClickListener {
+            dialog.dismiss()
+            showRecent()
+        }
+        body.findViewById<Button>(R.id.settingsImport).setOnClickListener {
+            dialog.dismiss()
+            showImportDialog()
+        }
+        body.findViewById<Button>(R.id.settingsClear).setOnClickListener {
+            dialog.dismiss()
+            confirmClear()
+        }
+        dialog.show()
+        val width = (resources.displayMetrics.widthPixels * 0.5f).toInt().coerceIn(360, 640)
+        dialog.window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+        body.findViewById<Button>(R.id.settingsRecent).requestFocus()
+    }
+
+    private fun showRecent() {
+        val recents = store.recentChannels()
+        if (recents.isEmpty()) {
+            Toast.makeText(this, "还没有最近播放的频道，先播放一个。", Toast.LENGTH_SHORT).show()
+            return
+        }
+        recentOnly = true
+        render()
+        Toast.makeText(this, "正在显示最近播放的 ${recents.size} 个频道", Toast.LENGTH_SHORT).show()
+        findViewById<RecyclerView>(R.id.channelList).requestFocus()
+    }
+
+    private fun confirmClear() {
+        AlertDialog.Builder(this, R.style.TvDialog)
+            .setTitle("清除 M3U")
+            .setMessage("将删除全部已导入的播放列表和频道，此操作无法恢复。")
+            .setPositiveButton("清除") { _, _ ->
+                player?.stop()
+                player?.clearMediaItems()
+                store.clearAll()
+                recentOnly = false
+                nowPlaying.text = "IPTV Client"
+                status.text = "选择频道开始播放"
+                render()
+                Toast.makeText(this, "已清除全部 M3U", Toast.LENGTH_SHORT).show()
+                findViewById<Button>(R.id.importKnown).requestFocus()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
     private fun showImportDialog() {
         val checked = BooleanArray(KnownPlaylists.all.size)
         KnownPlaylists.all.forEachIndexed { index, item ->
@@ -359,9 +427,9 @@ class MainActivity : AppCompatActivity() {
     private fun busy(on: Boolean) {
         progress.visibility = if (on) View.VISIBLE else View.GONE
         findViewById<Button>(R.id.importKnown).isEnabled = !on
-        findViewById<Button>(R.id.importMore).isEnabled = !on
-        findViewById<Button>(R.id.importMoreHeader).isEnabled = !on
         findViewById<Button>(R.id.importEmptyMore).isEnabled = !on
+        findViewById<Button>(R.id.settingsButton).isEnabled = !on
+        showAllButton.isEnabled = !on
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {

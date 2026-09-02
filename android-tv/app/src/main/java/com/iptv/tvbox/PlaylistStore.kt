@@ -22,19 +22,37 @@ class PlaylistStore(context: Context) {
     var channels: MutableList<Channel> = mutableListOf()
         private set
     var lastChannelId: String? = null
+    private val recentIds = mutableListOf<String>()
 
     init {
         load()
     }
 
-    fun grouped(query: String = ""): List<Pair<String, List<Channel>>> {
+    fun grouped(query: String = "", recentOnly: Boolean = false): List<Pair<String, List<Channel>>> {
         val q = query.trim().lowercase()
-        val filtered = if (q.isEmpty()) channels else channels.filter {
+        val source = if (recentOnly) recentChannels() else channels
+        val filtered = if (q.isEmpty()) source else source.filter {
             it.name.lowercase().contains(q) || it.group.lowercase().contains(q)
+        }
+        if (recentOnly) {
+            return if (filtered.isEmpty()) emptyList() else listOf("最近播放" to filtered)
         }
         return filtered.groupBy { it.group }
             .toSortedMap(compareBy { it })
             .map { it.key to it.value }
+    }
+
+    fun recentChannels(): List<Channel> {
+        val byId = channels.associateBy { it.id }
+        return recentIds.mapNotNull { byId[it] }
+    }
+
+    fun clearAll() {
+        playlists.clear()
+        channels.clear()
+        recentIds.clear()
+        lastChannelId = null
+        save()
     }
 
     fun importUrl(id: String, name: String, url: String): Int {
@@ -46,6 +64,8 @@ class PlaylistStore(context: Context) {
         channels.removeAll { it.sourceId == id }
         playlists.add(0, PlaylistRecord(id, name, url, parsed.size))
         channels.addAll(parsed)
+        val keep = channels.map { it.id }.toHashSet()
+        recentIds.removeAll { it !in keep }
         if (lastChannelId == null) lastChannelId = parsed.first().id
         save()
         return parsed.size
@@ -62,6 +82,9 @@ class PlaylistStore(context: Context) {
 
     fun setCurrent(id: String) {
         lastChannelId = id
+        recentIds.remove(id)
+        recentIds.add(0, id)
+        while (recentIds.size > 40) recentIds.removeAt(recentIds.lastIndex)
         save()
     }
 
@@ -87,6 +110,11 @@ class PlaylistStore(context: Context) {
         runCatching {
             val root = JSONObject(file.readText())
             lastChannelId = root.optString("lastChannelId").ifBlank { null }
+            val recent = root.optJSONArray("recentChannelIds") ?: JSONArray()
+            for (i in 0 until recent.length()) {
+                recentIds += recent.getString(i)
+            }
+            if (recentIds.isEmpty()) lastChannelId?.let { recentIds += it }
             val plist = root.optJSONArray("playlists") ?: JSONArray()
             for (i in 0 until plist.length()) {
                 val item = plist.getJSONObject(i)
@@ -117,6 +145,9 @@ class PlaylistStore(context: Context) {
     private fun save() {
         val root = JSONObject()
         root.put("lastChannelId", lastChannelId ?: "")
+        val recent = JSONArray()
+        recentIds.forEach { recent.put(it) }
+        root.put("recentChannelIds", recent)
         val plist = JSONArray()
         playlists.forEach {
             plist.put(

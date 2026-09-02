@@ -1,7 +1,8 @@
 "use client"
 
 import { useMemo, useState, useSyncExternalStore } from "react"
-import { FolderPlus, Radio, Search, Scale, Trash2 } from "lucide-react"
+import { FolderPlus, History, Radio, Search, Scale, Settings, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { ChannelSidebar } from "@/components/iptv/channel-sidebar"
 import { ImportDialog } from "@/components/iptv/import-dialog"
@@ -24,6 +25,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { APK_FILENAME } from "@/lib/apk"
 import { downloadPlaylist } from "@/lib/iptv-fetch"
 import { DEFAULT_IMPORT_IDS, KNOWN_PLAYLISTS } from "@/lib/known-playlists"
@@ -36,6 +43,7 @@ import {
   subscribeIptv,
   toggleFavorite,
   upsertPlaylist,
+  clearAll,
 } from "@/lib/iptv-store"
 import type { Channel } from "@/lib/iptv-types"
 
@@ -47,14 +55,26 @@ export function IptvApp() {
   )
   const [importOpen, setImportOpen] = useState(false)
   const [copyrightOpen, setCopyrightOpen] = useState(false)
+  const [clearOpen, setClearOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<"all" | "recent">("all")
   const [query, setQuery] = useState("")
   const [sourceFilter, setSourceFilter] = useState("all")
   const [bootstrapping, setBootstrapping] = useState(false)
   const [bootError, setBootError] = useState<string | null>(null)
 
+  const recentChannels = useMemo(() => {
+    const byId = new Map(state.channels.map((channel) => [channel.id, channel]))
+    return state.recentChannelIds
+      .map((id) => byId.get(id))
+      .filter((channel): channel is Channel => Boolean(channel))
+  }, [state.channels, state.recentChannelIds])
+
   const channels = useMemo(() => {
-    return state.channels.filter((channel) => {
-      if (sourceFilter !== "all" && channel.sourceId !== sourceFilter) return false
+    const source = viewMode === "recent" ? recentChannels : state.channels
+    return source.filter((channel) => {
+      if (viewMode === "all" && sourceFilter !== "all" && channel.sourceId !== sourceFilter) {
+        return false
+      }
       if (!query.trim()) return true
       const q = query.trim().toLowerCase()
       return (
@@ -62,16 +82,19 @@ export function IptvApp() {
         channel.group.toLowerCase().includes(q)
       )
     })
-  }, [state.channels, query, sourceFilter])
+  }, [state.channels, recentChannels, query, sourceFilter, viewMode])
 
   const favoriteChannels = channels.filter((channel) =>
     state.favorites.includes(channel.id),
   )
   const groups = useMemo(() => {
+    if (viewMode === "recent") {
+      return channels.length === 0 ? [] : [{ group: "最近播放", items: channels }]
+    }
     const grouped = groupChannels(channels)
     if (favoriteChannels.length === 0) return grouped
     return [{ group: "收藏", items: favoriteChannels }, ...grouped]
-  }, [channels, favoriteChannels])
+  }, [channels, favoriteChannels, viewMode])
 
   const active =
     channels.find((channel) => channel.id === state.lastChannelId) ??
@@ -114,6 +137,23 @@ export function IptvApp() {
     setLastChannel(channel.id)
   }
 
+  function showRecent() {
+    if (recentChannels.length === 0) {
+      toast.error("还没有最近播放的频道，先播放一个。")
+      return
+    }
+    setSourceFilter("all")
+    setViewMode("recent")
+  }
+
+  function clearPlaylists() {
+    clearAll()
+    setViewMode("all")
+    setSourceFilter("all")
+    setClearOpen(false)
+    toast.success("已清除全部 M3U")
+  }
+
   const empty = state.channels.length === 0
 
   return (
@@ -131,7 +171,9 @@ export function IptvApp() {
           <p className="text-[11px] text-muted-foreground">公开 M3U 直播播放器</p>
         </div>
         <Badge variant="secondary" className="hidden sm:inline-flex">
-          {state.channels.length} 频道
+          {viewMode === "recent"
+            ? `最近播放 · ${recentChannels.length}`
+            : `${state.channels.length} 频道`}
         </Badge>
         <div className="relative ml-auto hidden min-w-40 flex-1 sm:block sm:max-w-xs">
           <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -142,7 +184,13 @@ export function IptvApp() {
             className="h-8 pl-7"
           />
         </div>
-        <Select value={sourceFilter} onValueChange={setSourceFilter}>
+        <Select
+          value={sourceFilter}
+          onValueChange={(value) => {
+            setViewMode("all")
+            setSourceFilter(value)
+          }}
+        >
           <SelectTrigger className="w-32" size="sm">
             <SelectValue placeholder="全部源" />
           </SelectTrigger>
@@ -170,10 +218,28 @@ export function IptvApp() {
             下载 APK
           </a>
         </Button>
-        <Button size="sm" onClick={() => setImportOpen(true)}>
-          <FolderPlus data-icon="inline-start" />
-          导入 M3U
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm">
+              <Settings data-icon="inline-start" />
+              设置
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-44">
+            <DropdownMenuItem onSelect={() => showRecent()}>
+              <History />
+              最近播放
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setImportOpen(true)}>
+              <FolderPlus />
+              导入 M3U
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onSelect={() => setClearOpen(true)}>
+              <Trash2 />
+              清除 M3U
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button variant="outline" size="sm" onClick={() => setCopyrightOpen(true)}>
           <Scale data-icon="inline-start" />
           版权
@@ -182,13 +248,23 @@ export function IptvApp() {
 
       <div className="flex min-h-0 flex-1">
         <aside className="hidden w-[320px] shrink-0 flex-col border-r border-white/10 md:flex">
-          <div className="border-b border-white/10 p-2 sm:hidden" />
+          {viewMode === "recent" && (
+            <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-2">
+              <span className="text-sm font-medium">最近播放</span>
+              <Button size="xs" variant="ghost" onClick={() => setViewMode("all")}>
+                显示全部
+              </Button>
+            </div>
+          )}
           <ChannelSidebar
             groups={groups}
             activeId={active?.id}
             favorites={state.favorites}
             onSelect={play}
             onToggleFavorite={toggleFavorite}
+            emptyLabel={
+              viewMode === "recent" ? "没有匹配的最近播放频道。" : undefined
+            }
           />
         </aside>
 
@@ -224,12 +300,23 @@ export function IptvApp() {
             <>
               <PlayerStage channel={active} playlist={channels} onSelect={play} />
               <div className="h-72 overflow-hidden rounded-xl border border-white/10 md:hidden">
+                {viewMode === "recent" && (
+                  <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-2">
+                    <span className="text-sm font-medium">最近播放</span>
+                    <Button size="xs" variant="ghost" onClick={() => setViewMode("all")}>
+                      显示全部
+                    </Button>
+                  </div>
+                )}
                 <ChannelSidebar
                   groups={groups}
                   activeId={active?.id}
                   favorites={state.favorites}
                   onSelect={play}
                   onToggleFavorite={toggleFavorite}
+                  emptyLabel={
+                    viewMode === "recent" ? "没有匹配的最近播放频道。" : undefined
+                  }
                 />
               </div>
             </>
@@ -237,6 +324,24 @@ export function IptvApp() {
         </main>
       </div>
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} />
+      <Dialog open={clearOpen} onOpenChange={setClearOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>清除 M3U</DialogTitle>
+            <DialogDescription>
+              将删除全部已导入的播放列表和频道，此操作无法恢复。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setClearOpen(false)}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={clearPlaylists}>
+              清除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={copyrightOpen} onOpenChange={setCopyrightOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
