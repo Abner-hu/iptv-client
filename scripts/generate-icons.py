@@ -202,13 +202,21 @@ def banner(width: int, height: int) -> Image.Image:
     live_size = max(8, int(title_size * 0.55))
     live_font = ImageFont.truetype(LIVE_FONT, live_size * factor)
     tx = text_left * factor
-    title_h = title_font.getbbox(title)[3] - title_font.getbbox(title)[1]
-    live_h = live_font.getbbox("LIVE")[3] - live_font.getbbox("LIVE")[1]
-    gap = height * 0.06 * factor
+    title_box = title_font.getbbox(title)
+    live_box = live_font.getbbox("LIVE")
+    title_h = title_box[3] - title_box[1]
+    live_h = live_box[3] - live_box[1]
+    gap = height * 0.055 * factor
     block = title_h + gap + live_h
-    ty = (height * factor - block) / 2
-    draw.text((tx, ty), title, font=title_font, fill=WHITE)
-    draw.text((tx, ty + title_h + gap), "LIVE", font=live_font, fill=AMBER)
+    # Sit a bit above geometric center so the title lines up with the icon.
+    ty = (height * factor - block) / 2 - height * 0.07 * factor
+    draw.text((tx - title_box[0], ty - title_box[1]), title, font=title_font, fill=WHITE)
+    draw.text(
+        (tx - live_box[0], ty + title_h + gap - live_box[1]),
+        "LIVE",
+        font=live_font,
+        fill=AMBER,
+    )
     return canvas.resize((width, height), Image.Resampling.LANCZOS)
 
 
@@ -241,23 +249,13 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_preview_mid_512.png")
-    save(launcher(192), dest / "icon_preview_mid_192.png")
-    save(banner(640, 360), dest / "tv_banner_preview_mid.png")
+    save(icon, dest / "icon_preview_512.png")
+    save(launcher(192), dest / "icon_preview_192.png")
+    save(banner(640, 360), dest / "tv_banner_preview.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_preview_mid_{name}.png")
-
-    prev = dest / "icon_preview_keepgt_on_white.png"
-    if prev.exists():
-        ref = Image.open(prev).convert("RGBA")
-        compare = Image.new("RGBA", (560 + 40 + ref.width, 560), (245, 245, 245, 255))
-        plate = Image.new("RGBA", (560, 560), (245, 245, 245, 255))
-        plate.alpha_composite(icon, (24, 24))
-        compare.alpha_composite(plate, (0, 0))
-        compare.alpha_composite(ref, (560 + 40, 0))
-        save(compare, dest / "icon_preview_mid_vs_prev.png")
+        save(plate, dest / f"icon_preview_{name}.png")
 
 
 if __name__ == "__main__":
