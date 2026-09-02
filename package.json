@@ -4,9 +4,9 @@
   "private": true,
   "main": "electron/main.cjs",
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 --port 43217",
+    "dev": "next dev --hostname 0.0.0.0 --port 43217",
     "build": "next build",
-    "start": "next start --hostname 127.0.0.1 --port 43217",
+    "start": "next start --hostname 0.0.0.0 --port 43217",
     "lint": "eslint",
     "desktop": "electron .",
     "dist:win": "electron-builder --win portable --x64",
