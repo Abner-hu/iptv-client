@@ -56,22 +56,32 @@ Android 5.0 及以上即可，覆盖目前几乎所有手机。
 
 需要本机已安装 JDK 17+ 与 Android SDK（脚本默认 `$HOME/android-sdk`）。
 
-## 桌面窗口 / Windows exe
+## Windows 绿色版 exe
 
-先启动播放服务，再打开 Electron 窗口：
+双击即可用，播放服务打进安装包，不再需要本机先跑 `npm run start`。
+
+在已 `npm install` 的仓库里打包：
+
+```bash
+npm run dist:win
+```
+
+生成：
+
+- `release/IPTV-Client-1.0.20-portable.exe`（Windows x64 便携版，拷到电脑直接打开）
+
+在 Windows 上双击 exe。第一次会解压到临时目录并启动内置播放服务，窗口标题为 **IPTV Client**。
+
+开发时仍可分开跑网页和窗口：
 
 ```bash
 npm run dev
 npm run desktop
 ```
 
-Windows 上可打包便携版 exe（只是外壳窗口，仍需本机 `npm run start` 提供播放服务）：
+也可以双击 `scripts/start-iptv.bat`（需已 `npm install`，且本机已 `npm run start` 或 `npm run dev`）。
 
-```bash
-npm run dist:win
-```
-
-生成文件在 `release/IPTV终端*.exe`。也可以双击 `scripts/start-iptv.bat`（需已 `npm install`）。
+在 Linux / macOS 上交叉打包 Windows exe 时，便携版目标通常需要 [Wine](https://www.winehq.org/)。没有 Wine 时脚本会退回打 `release/IPTV-Client-*.zip`，拷到 Windows 解压后运行 `IPTV Client.exe`。
 
 ## 说明
 

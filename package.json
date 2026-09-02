@@ -1,15 +1,17 @@
 {
   "name": "iptv-terminal",
-  "version": "0.1.0",
+  "version": "1.0.20",
   "private": true,
   "main": "electron/main.cjs",
+  "author": "Abner Hu",
+  "description": "IPTV Client desktop player",
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 43217",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 43217",
     "lint": "eslint",
     "desktop": "electron .",
-    "dist:win": "electron-builder --win portable --x64",
+    "dist:win": "bash scripts/build-win-exe.sh",
     "apk": "bash scripts/build-tv-apk.sh"
   },
   "dependencies": {
@@ -41,15 +43,31 @@
   },
   "build": {
     "appId": "com.iptv.terminal",
-    "productName": "IPTV终端",
+    "productName": "IPTV Client",
+    "copyright": "Copyright © 2026 Abner Hu",
+    "asar": true,
     "files": [
       "electron/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "standalone",
+        "filter": [
+          "**/*",
+          "!**/*.map"
+        ]
+      }
     ],
     "directories": {
       "output": "release"
     },
     "win": {
+      "icon": "electron/icon.ico",
+      "signAndEditResources": false,
+      "artifactName": "IPTV-Client-${version}-win-x64.${ext}",
       "target": [
         {
           "target": "portable",
@@ -58,6 +76,9 @@
           ]
         }
       ]
+    },
+    "portable": {
+      "artifactName": "IPTV-Client-${version}-portable.exe"
     }
   }
 }

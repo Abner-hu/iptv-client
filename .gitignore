@@ -22,6 +22,11 @@
 *.apk
 !public/iptv-client.v*.apk
 !release/iptv-client.v*.apk
+/release/*.exe
+/release/*.zip
+/release/win-unpacked/
+/release/*.blockmap
+/release/*.yml
 
 # misc
 .DS_Store
