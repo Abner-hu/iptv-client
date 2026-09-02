@@ -156,7 +156,6 @@ def launcher(size: int) -> Image.Image:
 def banner(width: int, height: int) -> Image.Image:
     factor = 4
     canvas = Image.new("RGBA", (width * factor, height * factor), BLACK)
-    draw = ImageDraw.Draw(canvas)
 
     mark = min(height * 0.72, width * 0.28)
     mx = width * 0.05
@@ -166,39 +165,71 @@ def banner(width: int, height: int) -> Image.Image:
         Image.Resampling.LANCZOS,
     )
     canvas.alpha_composite(icon, (int(mx * factor), int(my * factor)))
+    canvas = canvas.resize((width, height), Image.Resampling.LANCZOS)
 
-    text_left = mx + mark + width * 0.045
-    text_right = width * 0.94
+    # Pin glyph ink to the 640x360 lockup; other densities scale with the canvas.
     title_size = max(11, int(height * 0.168))
-    title_font = ImageFont.truetype(TITLE_FONT, title_size * factor)
-    title = "IPTV Client"
-    while title_size > 9:
-        bbox = title_font.getbbox(title)
-        tw = (bbox[2] - bbox[0]) / factor
-        if tw <= text_right - text_left:
-            break
-        title_size -= 1
-        title_font = ImageFont.truetype(TITLE_FONT, title_size * factor)
+    title_font = ImageFont.truetype(TITLE_FONT, title_size)
     live_size = max(8, int(title_size * 0.55))
-    live_font = ImageFont.truetype(LIVE_FONT, live_size * factor)
-    tx = text_left * factor
-    title_box = title_font.getbbox(title)
-    live_box = live_font.getbbox("LIVE")
-    title_h = title_box[3] - title_box[1]
-    live_h = live_box[3] - live_box[1]
-    gap = height * 0.055 * factor
-    block = title_h + gap + live_h
-    # Center the title + LIVE block with the icon; a hair below canvas
-    # center matches the lockup (LIVE hangs under IPTV).
-    ty = (height * factor - block) / 2 + height * 0.024 * factor
-    draw.text((tx - title_box[0], ty - title_box[1]), title, font=title_font, fill=WHITE)
-    draw.text(
-        (tx - live_box[0], ty + title_h + gap - live_box[1]),
-        "LIVE",
-        font=live_font,
-        fill=AMBER,
+    live_font = ImageFont.truetype(LIVE_FONT, live_size)
+    sx = width / 640
+    sy = height / 360
+    _blit_text(canvas, "IPTV Client", title_font, WHITE, (240 * sx, 140 * sy))
+    _blit_text(canvas, "LIVE", live_font, AMBER, (240 * sx, 205 * sy))
+    return canvas
+
+
+def _visible_origin(img: Image.Image, fill: tuple[int, int, int, int]) -> tuple[int, int] | None:
+    """Top-left of visible ink after compositing onto black, matching banner measurements."""
+    bg = Image.new("RGBA", img.size, (0, 0, 0, 255))
+    bg.alpha_composite(img)
+    px = bg.load()
+    w, h = img.size
+    minx, miny = w, h
+    white = fill[1] > 200
+    found = False
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if white:
+                ok = a > 180 and r > 230 and g > 230 and b > 230
+            else:
+                ok = a > 180 and r > 180 and 80 < g < 200 and b < 80
+            if ok:
+                minx = min(minx, x)
+                miny = min(miny, y)
+                found = True
+    if not found:
+        return None
+    return minx, miny
+
+
+def _blit_text(
+    canvas: Image.Image,
+    text: str,
+    font: ImageFont.FreeTypeFont,
+    fill: tuple[int, int, int, int],
+    origin: tuple[float, float],
+) -> None:
+    """Paste `text` so visible ink top-left sits at `origin`."""
+    bbox = font.getbbox(text)
+    pad = 16
+    layer = Image.new(
+        "RGBA",
+        (max(1, bbox[2] - bbox[0] + pad * 2), max(1, bbox[3] - bbox[1] + pad * 2)),
+        (0, 0, 0, 0),
     )
-    return canvas.resize((width, height), Image.Resampling.LANCZOS)
+    ImageDraw.Draw(layer).text((pad - bbox[0], pad - bbox[1]), text, font=font, fill=fill)
+    ink = layer.getbbox()
+    if ink is None:
+        return
+    cropped = layer.crop(ink)
+    vis = _visible_origin(cropped, fill)
+    if vis is None:
+        dest = (int(round(origin[0])), int(round(origin[1])))
+    else:
+        dest = (int(round(origin[0] - vis[0])), int(round(origin[1] - vis[1])))
+    canvas.alpha_composite(cropped, dest=dest)
 
 
 def save(img: Image.Image, path: Path) -> None:
@@ -230,13 +261,13 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_v14_512.png")
-    save(launcher(192), dest / "icon_v14_192.png")
-    save(banner(640, 360), dest / "tv_banner_v14.png")
+    save(icon, dest / "icon_v15b_512.png")
+    save(launcher(192), dest / "icon_v15b_192.png")
+    save(banner(640, 360), dest / "tv_banner_lockup_240.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_v14_{name}.png")
+        save(plate, dest / f"icon_v15b_{name}.png")
 
 
 if __name__ == "__main__":
