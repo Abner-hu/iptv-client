@@ -7,7 +7,6 @@ white > with short horizontal terminals. White marks have no outline.
 
 from __future__ import annotations
 
-import math
 import sys
 from pathlib import Path
 
@@ -71,36 +70,16 @@ def _scale(draw: ImageDraw.ImageDraw, factor: int):
     return Scaled()
 
 
-def _thick_line(p1: tuple[float, float], p2: tuple[float, float], width: float) -> list[tuple[float, float]]:
-    dx, dy = p2[0] - p1[0], p2[1] - p1[1]
-    length = math.hypot(dx, dy) or 1.0
-    nx, ny = -dy / length * width / 2, dx / length * width / 2
-    return [
-        (p1[0] + nx, p1[1] + ny),
-        (p1[0] - nx, p1[1] - ny),
-        (p2[0] - nx, p2[1] - ny),
-        (p2[0] + nx, p2[1] + ny),
-    ]
-
-
-def _dot(s, c: tuple[float, float], diameter: float) -> None:
-    r = diameter / 2
-    s.ellipse((c[0] - r, c[1] - r, c[0] + r, c[1] + r), fill=WHITE)
-
-
-def _seg_mass(p1: tuple[float, float], p2: tuple[float, float], width: float) -> tuple[float, float, float]:
-    length = math.hypot(p2[0] - p1[0], p2[1] - p1[1])
-    return length * width, (p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2
-
-
-def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], factor: int) -> None:
+def draw_mark(canvas: Image.Image, box: tuple[float, float, float, float], factor: int) -> None:
     """White I + short-bar > with curved joins. No dot under >.
 
-    Spacing is the pre-widening gap. > keeps the height it had with the
-    circle. The I+> group is shifted so its visual center sits in the box.
+    I stays taller than >; tops stay aligned. The I+> group is placed by
+    its bounding box so left/right and top/bottom pads in the red field match.
     """
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
     s = _scale(draw, factor)
 
     stroke = min(w, h) * 0.155
@@ -108,7 +87,7 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     pad_y = h * 0.09
     top = y0 + pad_y
     bot = y1 - pad_y
-    overlap = 4.0
+    overlap = stroke * 0.072
 
     y_upper = top + half
     bar_bot = bot - stroke + overlap
@@ -118,8 +97,7 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     gap_i = stroke * 0.55
 
     content_w = stroke + gap_i + stub + run + half
-    left = x0 + (w - content_w) / 2
-    i_left = left
+    i_left = x0 + (w - content_w) / 2
     x_edge = i_left + stroke + gap_i
     p0 = (x_edge, y_upper)
     p1 = (x_edge + stub, y_upper)
@@ -127,26 +105,29 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     p3 = (x_edge + stub, y_lower)
     p4 = (x_edge, y_lower)
 
-    masses = [
-        (stroke * (bot - top), i_left + half, (top + bot) / 2),
-        _seg_mass(p0, p1, stroke),
-        _seg_mass(p1, p2, stroke),
-        _seg_mass(p2, p3, stroke),
-        _seg_mass(p3, p4, stroke),
-    ]
-    tw = sum(m[0] for m in masses) or 1.0
-    cx = sum(m[0] * m[1] for m in masses) / tw
-    cy = sum(m[0] * m[2] for m in masses) / tw
-    dx = (x0 + w / 2) - cx
-    dy = (y0 + h / 2) - cy
-
-    s.rectangle((i_left + dx, top + dy, i_left + stroke + dx, bot + dy), fill=WHITE)
+    s.rectangle((i_left, top, i_left + stroke, bot), fill=WHITE)
     pts = [
-        (int(round((p[0] + dx) * factor)), int(round((p[1] + dy) * factor)))
+        (int(round(p[0] * factor)), int(round(p[1] * factor)))
         for p in (p0, p1, p2, p3, p4)
     ]
     width_px = max(5, int(round(stroke * factor)))
     draw.line(pts, fill=WHITE, width=width_px, joint="curve")
+
+    ink = overlay.getbbox()
+    if ink is None:
+        return
+    ix0, iy0, ix1, iy1 = ink
+    box_cx = (x0 + x1) / 2 * factor
+    box_cy = (y0 + y1) / 2 * factor
+    ink_cx = (ix0 + ix1) / 2
+    ink_cy = (iy0 + iy1) / 2
+    dx = int(round(box_cx - ink_cx))
+    dy = int(round(box_cy - ink_cy))
+    if dx or dy:
+        shifted = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+        shifted.paste(overlay, (dx, dy), overlay)
+        overlay = shifted
+    canvas.alpha_composite(overlay)
 
 
 def launcher(size: int) -> Image.Image:
@@ -168,7 +149,7 @@ def launcher(size: int) -> Image.Image:
     )
     # Keep white marks inside the red field so they never pick up the black frame.
     inset = inner + size * 0.04
-    draw_mark(draw, (inset, inset, size - inset, size - inset), factor)
+    draw_mark(canvas, (inset, inset, size - inset, size - inset), factor)
     return canvas.resize((size, size), Image.Resampling.LANCZOS)
 
 
@@ -176,7 +157,6 @@ def banner(width: int, height: int) -> Image.Image:
     factor = 4
     canvas = Image.new("RGBA", (width * factor, height * factor), BLACK)
     draw = ImageDraw.Draw(canvas)
-    s = _scale(draw, factor)
 
     mark = min(height * 0.72, width * 0.28)
     mx = width * 0.05
@@ -249,13 +229,13 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_preview_512.png")
-    save(launcher(192), dest / "icon_preview_192.png")
-    save(banner(640, 360), dest / "tv_banner_preview.png")
+    save(icon, dest / "icon_centered_512.png")
+    save(launcher(192), dest / "icon_centered_192.png")
+    save(banner(640, 360), dest / "tv_banner_centered.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_preview_{name}.png")
+        save(plate, dest / f"icon_centered_{name}.png")
 
 
 if __name__ == "__main__":

@@ -161,12 +161,12 @@ export function IptvApp() {
       <header className="flex items-center gap-3 border-b border-white/10 px-4 py-2.5">
         <span className="flex size-8 items-center justify-center rounded-md bg-red-600 shadow-[0_0_20px_color-mix(in_oklch,red_40%,transparent)]">
           <svg viewBox="0 0 32 32" className="size-5" aria-hidden>
-            <rect x="6.2" y="5.4" width="3.4" height="21.2" fill="white" />
+            <rect x="5.01" y="2.88" width="4.96" height="26.24" fill="white" />
             <path
-              d="M12.5 7.3h2.4L22.8 16.2 14.9 25h-2.4"
+              d="M12.7 5.36h3.47L24.51 13.7 16.17 22.04H12.7"
               fill="none"
               stroke="white"
-              strokeWidth="3.4"
+              strokeWidth="4.96"
               strokeLinejoin="round"
               strokeLinecap="butt"
             />
