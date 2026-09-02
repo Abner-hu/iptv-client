@@ -88,11 +88,16 @@ def _dot(s, c: tuple[float, float], diameter: float) -> None:
     s.ellipse((c[0] - r, c[1] - r, c[0] + r, c[1] + r), fill=WHITE)
 
 
+def _seg_mass(p1: tuple[float, float], p2: tuple[float, float], width: float) -> tuple[float, float, float]:
+    length = math.hypot(p2[0] - p1[0], p2[1] - p1[1])
+    return length * width, (p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2
+
+
 def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], factor: int) -> None:
     """White I + short-bar > with curved joins. No dot under >.
 
     Spacing is the pre-widening gap. > keeps the height it had with the
-    circle; it is not stretched to match the I.
+    circle. The I+> group is shifted so its visual center sits in the box.
     """
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
@@ -103,7 +108,6 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     pad_y = h * 0.09
     top = y0 + pad_y
     bot = y1 - pad_y
-    # Same > geometry as when the tangent circle occupied the bottom.
     overlap = 4.0
 
     y_upper = top + half
@@ -116,15 +120,31 @@ def draw_mark(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float],
     content_w = stroke + gap_i + stub + run + half
     left = x0 + (w - content_w) / 2
     i_left = left
-    s.rectangle((i_left, top, i_left + stroke, bot), fill=WHITE)
-
     x_edge = i_left + stroke + gap_i
     p0 = (x_edge, y_upper)
     p1 = (x_edge + stub, y_upper)
     p2 = (x_edge + stub + run, (y_upper + y_lower) / 2)
     p3 = (x_edge + stub, y_lower)
     p4 = (x_edge, y_lower)
-    pts = [(int(round(p[0] * factor)), int(round(p[1] * factor))) for p in (p0, p1, p2, p3, p4)]
+
+    masses = [
+        (stroke * (bot - top), i_left + half, (top + bot) / 2),
+        _seg_mass(p0, p1, stroke),
+        _seg_mass(p1, p2, stroke),
+        _seg_mass(p2, p3, stroke),
+        _seg_mass(p3, p4, stroke),
+    ]
+    tw = sum(m[0] for m in masses) or 1.0
+    cx = sum(m[0] * m[1] for m in masses) / tw
+    cy = sum(m[0] * m[2] for m in masses) / tw
+    dx = (x0 + w / 2) - cx
+    dy = (y0 + h / 2) - cy
+
+    s.rectangle((i_left + dx, top + dy, i_left + stroke + dx, bot + dy), fill=WHITE)
+    pts = [
+        (int(round((p[0] + dx) * factor)), int(round((p[1] + dy) * factor)))
+        for p in (p0, p1, p2, p3, p4)
+    ]
     width_px = max(5, int(round(stroke * factor)))
     draw.line(pts, fill=WHITE, width=width_px, joint="curve")
 
@@ -221,15 +241,15 @@ def write_app_assets() -> None:
 def write_preview(dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     icon = launcher(512)
-    save(icon, dest / "icon_preview_keepgt_512.png")
-    save(launcher(192), dest / "icon_preview_keepgt_192.png")
-    save(banner(640, 360), dest / "tv_banner_preview_keepgt.png")
+    save(icon, dest / "icon_preview_mid_512.png")
+    save(launcher(192), dest / "icon_preview_mid_192.png")
+    save(banner(640, 360), dest / "tv_banner_preview_mid.png")
     for name, bg in (("on_white", (245, 245, 245, 255)), ("on_black", (11, 11, 13, 255))):
         plate = Image.new("RGBA", (560, 560), bg)
         plate.alpha_composite(icon, (24, 24))
-        save(plate, dest / f"icon_preview_keepgt_{name}.png")
+        save(plate, dest / f"icon_preview_mid_{name}.png")
 
-    prev = dest / "icon_preview_fillet_on_white.png"
+    prev = dest / "icon_preview_keepgt_on_white.png"
     if prev.exists():
         ref = Image.open(prev).convert("RGBA")
         compare = Image.new("RGBA", (560 + 40 + ref.width, 560), (245, 245, 245, 255))
@@ -237,7 +257,7 @@ def write_preview(dest: Path) -> None:
         plate.alpha_composite(icon, (24, 24))
         compare.alpha_composite(plate, (0, 0))
         compare.alpha_composite(ref, (560 + 40, 0))
-        save(compare, dest / "icon_preview_keepgt_vs_prev.png")
+        save(compare, dest / "icon_preview_mid_vs_prev.png")
 
 
 if __name__ == "__main__":
