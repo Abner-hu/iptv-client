@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState, useSyncExternalStore } from "react"
-import { FolderPlus, History, Radio, Search, Scale, Settings, Trash2 } from "lucide-react"
+import { FolderPlus, History, Info, Radio, Search, Settings, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { ChannelSidebar } from "@/components/iptv/channel-sidebar"
@@ -253,7 +253,7 @@ export function IptvApp() {
           </DropdownMenuContent>
         </DropdownMenu>
         <Button variant="outline" size="sm" onClick={() => setCopyrightOpen(true)}>
-          <Scale data-icon="inline-start" />
+          <Info data-icon="inline-start" />
           关于
         </Button>
       </header>
