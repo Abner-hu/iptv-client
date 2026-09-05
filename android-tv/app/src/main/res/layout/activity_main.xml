@@ -86,7 +86,7 @@
             android:focusable="true"
             android:nextFocusLeft="@id/settingsButton"
             android:nextFocusDown="@id/channelList"
-            android:text="版权"
+            android:text="关于"
             android:textColor="#F5F5F4" />
     </LinearLayout>
 

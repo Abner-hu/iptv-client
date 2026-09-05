@@ -307,7 +307,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showCopyright() {
         AlertDialog.Builder(this, R.style.TvDialog)
-            .setTitle("版权信息")
+            .setTitle("关于")
             .setMessage(
                 "软件名称：IPTV Client\n" +
                     "版权所有人：Abner Hu\n" +

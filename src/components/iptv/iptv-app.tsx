@@ -254,7 +254,7 @@ export function IptvApp() {
         </DropdownMenu>
         <Button variant="outline" size="sm" onClick={() => setCopyrightOpen(true)}>
           <Scale data-icon="inline-start" />
-          版权
+          关于
         </Button>
       </header>
 
@@ -362,8 +362,8 @@ export function IptvApp() {
       <Dialog open={copyrightOpen} onOpenChange={setCopyrightOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>版权信息</DialogTitle>
-            <DialogDescription>IPTV Client 软件著作权说明</DialogDescription>
+            <DialogTitle>关于</DialogTitle>
+            <DialogDescription>IPTV Client 软件说明</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 text-sm leading-6">
             <p>软件名称：IPTV Client</p>
