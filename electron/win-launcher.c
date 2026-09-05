@@ -7,7 +7,7 @@
 
 #define FOOTER_MAGIC "IPTVZIP1"
 #define APP_DIR_NAME L"IPTV Client"
-#define APP_VER L"1.0.20"
+#define APP_VER L"1.1.0"
 #define APP_EXE L"IPTV Client.exe"
 
 static void fail(const wchar_t *msg) {

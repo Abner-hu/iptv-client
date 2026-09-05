@@ -33,8 +33,8 @@ npm run apk
 
 生成：
 
-- `release/iptv-client.v<版本号>.apk`（当前为 `iptv-client.v1.0.20.apk`）
-- 开发服务器也可下载： [http://127.0.0.1:43217/iptv-client.v1.0.20.apk](http://127.0.0.1:43217/iptv-client.v1.0.20.apk)
+- `release/iptv-client.v<版本号>.apk`（当前为 `iptv-client.v1.1.0.apk`）
+- 开发服务器也可下载： [http://127.0.0.1:43217/iptv-client.v1.1.0.apk](http://127.0.0.1:43217/iptv-client.v1.1.0.apk)
 
 ### 装到电视上
 
@@ -47,7 +47,7 @@ npm run apk
 
 ### 装到安卓手机
 
-1. 把 `iptv-client.v1.0.20.apk` 发到手机（微信/网盘/数据线）。
+1. 把 `iptv-client.v1.1.0.apk` 发到手机（微信/网盘/数据线）。
 2. 打开文件，允许「安装未知应用」。
 3. 安装完成后在桌面打开 **IPTV Client**。
 4. 竖屏为播放器在上、频道列表在下；横屏与电视相同，左侧列表、右侧画面。
@@ -68,12 +68,12 @@ npm run dist:win
 
 生成（约 150MB，请从 **Release** 下载，不要把 GitHub 网页另存为 exe）：
 
-- [IPTV-Client-1.0.20-portable.exe](https://github.com/Abner-hu/iptv-client/releases/latest/download/IPTV-Client-1.0.20-portable.exe)（Windows 10+ x64 / ARM64，双击即可）
-- [IPTV-Client-1.0.20-win-x64.zip](https://github.com/Abner-hu/iptv-client/releases/latest/download/IPTV-Client-1.0.20-win-x64.zip)（解压后运行 `IPTV Client.exe`）
+- [IPTV-Client-1.1.0-portable.exe](https://github.com/Abner-hu/iptv-client/releases/latest/download/IPTV-Client-1.1.0-portable.exe)（Windows 10+ x64 / ARM64，双击即可）
+- [IPTV-Client-1.1.0-win-x64.zip](https://github.com/Abner-hu/iptv-client/releases/latest/download/IPTV-Client-1.1.0-win-x64.zip)（解压后运行 `IPTV Client.exe`）
 
 完整 exe 大约 **150MB**。如果只有一两百 KB，那是浏览器把网页存成了 exe，请用上面的 Release 直链重新下。
 
-在 Windows 上双击 exe。第一次会解压到 `%LOCALAPPDATA%\IPTV Client\1.0.20\`，之后直接启动。
+在 Windows 上双击 exe。第一次会解压到 `%LOCALAPPDATA%\IPTV Client\1.1.0\`，之后直接启动。
 
 开发时仍可分开跑网页和窗口：
 

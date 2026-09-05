@@ -31,7 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { APK_FILENAME, EXE_DOWNLOAD_URL, EXE_FILENAME } from "@/lib/apk"
+import { APK_FILENAME, APP_VERSION, EXE_DOWNLOAD_URL, EXE_FILENAME } from "@/lib/apk"
 import { downloadPlaylist } from "@/lib/iptv-fetch"
 import { DEFAULT_IMPORT_IDS, KNOWN_PLAYLISTS } from "@/lib/known-playlists"
 import { groupChannels, parseM3u } from "@/lib/m3u"
@@ -367,6 +367,7 @@ export function IptvApp() {
           </DialogHeader>
           <div className="space-y-2 text-sm leading-6">
             <p>软件名称：IPTV Client</p>
+            <p>版本：{APP_VERSION}</p>
             <p>版权所有人：Abner Hu</p>
             <p>Copyright © 2026 Abner Hu. All rights reserved.</p>
             <p className="text-muted-foreground">
